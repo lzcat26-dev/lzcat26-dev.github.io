@@ -40,11 +40,14 @@
   .otz-hero {
     position: relative; border: 1px solid var(--line-dim); border-radius: 2px; overflow: hidden;
     height: clamp(15rem, 32vw, 20rem); margin-bottom: 2.5rem;
+    background-image: url('images/otz-hero.jpg');
+    background-size: cover;
+    background-position: center 35%;
   }
-  .otz-hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.5; }
+  .otz-hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.15; mix-blend-mode: overlay; }
   .otz-hero::after {
     content: ""; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(10,12,14,0.15) 0%, rgba(10,12,14,0.92) 100%);
+    background: linear-gradient(180deg, rgba(10,12,14,0.25) 0%, rgba(10,12,14,0.95) 100%);
     pointer-events: none;
   }
   .otz-hero-content {
@@ -83,6 +86,7 @@
   .otz-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.9rem; }
   .otz-shot { position: relative; aspect-ratio: 16 / 10; border: 1px solid var(--line-dim); border-radius: 2px; overflow: hidden; }
   .otz-shot canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.35; }
+  .otz-shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
   .otz-shot .cap {
     position: absolute; left: 0; right: 0; bottom: 0; padding: 0.5rem 0.65rem;
     font-size: 0.68rem; letter-spacing: 0.03em; color: var(--static);
@@ -173,9 +177,9 @@
     <section class="otz-section">
       <div class="otz-section-head"><span class="idx">03</span><h2>映像</h2><span class="rule"></span></div>
       <div class="otz-gallery" id="otzGallery">
-        <div class="otz-shot" data-label="モニター視聴"></div>
-        <div class="otz-shot" data-label="テーブルの下"></div>
-        <div class="otz-shot" data-label="異常発生時"></div>
+        <div class="otz-shot"><img src="images/otz-monitor.jpg" alt="モニター視聴"><div class="cap">モニター視聴</div></div>
+        <div class="otz-shot"><img src="images/otz-table.gif" alt="テーブルの下"><div class="cap">テーブルの下</div></div>
+        <div class="otz-shot"><img src="images/otz-room.jpg" alt="監視室"><div class="cap">監視室</div></div>
       </div>
     </section>
 
@@ -225,20 +229,6 @@
   }
 
   drawStatic(document.getElementById("otzHeroStatic"));
-
-  document.querySelectorAll("#otzGallery .otz-shot").forEach(function (shot) {
-    var canvas = document.createElement("canvas");
-    shot.prepend(canvas);
-    var pending = document.createElement("div");
-    pending.className = "pending";
-    pending.textContent = "FOOTAGE PENDING";
-    shot.appendChild(pending);
-    var cap = document.createElement("div");
-    cap.className = "cap";
-    cap.textContent = shot.dataset.label;
-    shot.appendChild(cap);
-    drawStatic(canvas);
-  });
 })();
 </script>
 </body>
