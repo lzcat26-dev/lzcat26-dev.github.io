@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LZ GUNS | LZCのアドオン倉庫</title>
+<meta name="description" content="Minecraft Bedrock向けの銃アドオン。M16、M1928A1、UZI、Model 37、SVD、L96A1、エオカ、火縄銃の8種類。先読み補正つきの射撃、スコープ、リロード、射撃練習用の的つき。">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1868783573127394" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #1b1d17;
+    --bg-raised: #23261e;
+    --bg-sunk: #141611;
+    --ink: #e9e6d8;
+    --ink-soft: #9c9a88;
+    --line: #34382c;
+    --olive: #8a9a5b;
+    --brass: #d2a24c;
+    --red: #c4523d;
+
+    --font-body: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  code { font-family: var(--font-mono); font-size: 0.92em; }
+
+  .wrap { max-width: 64rem; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+  .back { display: inline-block; margin: 1.5rem 0 0; font-size: 0.85rem; color: var(--ink-soft); text-decoration: none; }
+  .back:hover { color: var(--ink); }
+
+  /* ===== hero：照準のついた射撃場 ===== */
+  .hero {
+    margin-top: 1.25rem; border: 1px solid var(--line); border-radius: 0.3rem; overflow: hidden;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 39px, rgba(138,154,91,0.08) 39px 40px),
+      repeating-linear-gradient(0deg, transparent 0 39px, rgba(138,154,91,0.08) 39px 40px),
+      var(--bg-sunk);
+    position: relative;
+  }
+  .hero-inner { position: relative; padding: clamp(1.5rem, 5vw, 3rem); display: grid; gap: 0.6rem; }
+  .reticle { position: absolute; right: clamp(1rem, 6vw, 4rem); top: 50%; transform: translateY(-50%); width: clamp(7rem, 22vw, 12rem); height: auto; opacity: 0.9; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.18em; color: var(--olive); margin: 0; }
+  .hero h1 { margin: 0; font-family: var(--font-mono); font-size: clamp(2rem, 6vw, 3.2rem); letter-spacing: 0.08em; line-height: 1.15; }
+  .hero .tagline { margin: 0; color: var(--ink-soft); max-width: 28rem; }
+  @media (max-width: 560px){ .reticle { opacity: 0.25; } }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.25rem 0 0; }
+  .pill { font-size: 0.78rem; padding: 0.25rem 0.7rem; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft); background: var(--bg-raised); }
+
+  section { margin-top: clamp(2.5rem, 6vw, 3.5rem); }
+  .head { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.1rem; }
+  .head .idx { font-family: var(--font-mono); font-size: 0.8rem; color: var(--brass); }
+  .head h2 { margin: 0; font-size: 1.1rem; letter-spacing: 0.02em; }
+  .head .rule { flex: 1; height: 1px; background: var(--line); }
+  p { margin: 0 0 0.9rem; }
+  .soft { color: var(--ink-soft); }
+
+  /* ===== 銃の一覧 ===== */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 0.3rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 34rem; }
+  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-weight: 600; color: var(--ink-soft); font-size: 0.78rem; background: var(--bg-raised); }
+  td.num { font-family: var(--font-mono); text-align: right; }
+  th.num { text-align: right; }
+  tr:last-child td { border-bottom: none; }
+  td .kind { display: block; font-size: 0.72rem; color: var(--ink-soft); }
+  .table-note { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.6rem; }
+
+  /* ===== 特徴 ===== */
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem; }
+  .feature { background: var(--bg-raised); border: 1px solid var(--line); border-radius: 0.3rem; padding: 1rem 1.1rem; }
+  .feature .fk { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; color: var(--olive); }
+  .feature h3 { margin: 0.2rem 0 0.4rem; font-size: 0.98rem; }
+  .feature p { margin: 0; font-size: 0.86rem; color: var(--ink-soft); }
+
+  /* ===== 操作 ===== */
+  .controls { display: grid; gap: 0.5rem; }
+  .control { display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; padding: 0.6rem 0.9rem; background: var(--bg-raised); border: 1px solid var(--line); border-radius: 0.3rem; font-size: 0.9rem; }
+  .control .k { font-weight: 600; }
+  @media (max-width: 560px){ .control { grid-template-columns: 1fr; gap: 0.1rem; } }
+
+  .note { background: var(--bg-raised); border: 1px solid var(--line); border-left: 3px solid var(--brass); border-radius: 0.3rem; padding: 0.9rem 1rem; font-size: 0.9rem; }
+  .note ul { margin: 0; padding-left: 1.2rem; }
+
+  .credits { display: grid; gap: 0.5rem; }
+  .credit { background: var(--bg-raised); border: 1px solid var(--line); border-radius: 0.3rem; padding: 0.7rem 0.9rem; font-size: 0.84rem; }
+  .credit .gun { font-weight: 600; display: block; margin-bottom: 0.15rem; }
+  .credit .txt { color: var(--ink-soft); word-break: break-word; }
+  .credit a { color: var(--ink); }
+
+  .cta { display: flex; justify-content: space-between; align-items: center; gap: 1.25rem; flex-wrap: wrap; background: var(--bg-raised); border: 1px solid var(--line); border-radius: 0.3rem; padding: clamp(1.1rem, 3vw, 1.6rem); }
+  .cta h3 { margin: 0 0 0.3rem; font-size: 1.1rem; }
+  .cta p { margin: 0; font-size: 0.88rem; color: var(--ink-soft); }
+  .dl { display: inline-block; text-decoration: none; font-weight: 700; background: var(--brass); color: #1b1407; padding: 0.75rem 1.4rem; border-radius: 0.3rem; }
+  .dl:hover, .dl:focus-visible { filter: brightness(1.08); outline: none; }
+  .dl-sub { font-size: 0.75rem; color: var(--ink-soft); margin: 0.4rem 0 0; text-align: center; }
+
+  footer { margin: clamp(3rem, 7vw, 4.5rem) 0 2.5rem; padding-top: 1.4rem; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← 作品一覧へ戻る</a>
+
+    <div class="hero">
+      <svg class="reticle" viewBox="0 0 120 120" aria-hidden="true">
+        <g fill="none" stroke="#d2a24c" stroke-width="2">
+          <circle cx="60" cy="60" r="44"/>
+          <circle cx="60" cy="60" r="3" fill="#c4523d" stroke="none"/>
+          <path d="M60 4v30M60 86v30M4 60h30M86 60h30"/>
+          <path d="M60 40v6M60 74v6M40 60h6M74 60h6" stroke-width="1.2" stroke-opacity="0.7"/>
+        </g>
+      </svg>
+      <div class="hero-inner">
+        <p class="eyebrow">MINECRAFT BEDROCK ADDON</p>
+        <h1>LZ GUNS</h1>
+        <p class="tagline">8丁の銃と、動く的と、当てるための細かい工夫。</p>
+      </div>
+    </div>
+
+    <div class="pills">
+      <span class="pill">Minecraft Bedrock 1.26 以降</span>
+      <span class="pill">銃 8種類</span>
+      <span class="pill">マルチプレイ対応</span>
+      <span class="pill">射撃練習の的つき</span>
+    </div>
+
+    <section>
+      <div class="head"><span class="idx">01</span><h2>概要</h2><span class="rule"></span></div>
+      <p>アサルトライフルからスナイパー、ショットガン、火縄銃まで、8種類の銃を追加するアドオンです。一人称・三人称ともに銃を構える動き、撃つ動き、リロードの動きがあり、しゃがむとのぞきこんで狙えます。</p>
+      <p class="soft">視点を振りながら撃ったときのずれを補う「先読み」や、弾の通り道の近くの相手に当てる補正など、PvPで当てやすくする仕組みを入れています。</p>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">02</span><h2>銃の一覧</h2><span class="rule"></span></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>銃</th><th class="num">ダメージ</th><th class="num">RPM</th><th class="num">TTK</th><th class="num">装弾数</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>M16<span class="kind">アサルトライフル</span></td><td class="num">3.8</td><td class="num">400</td><td class="num">0.75秒</td><td class="num">30</td></tr>
+            <tr><td>M1928A1<span class="kind">サブマシンガン</span></td><td class="num">3.1</td><td class="num">600</td><td class="num">0.6秒</td><td class="num">20</td></tr>
+            <tr><td>UZI(silencer)<span class="kind">サブマシンガン</span></td><td class="num">2.5</td><td class="num">900</td><td class="num">0.45秒</td><td class="num">25</td></tr>
+            <tr><td>Model 37<span class="kind">ショットガン</span></td><td class="num">1.9×12</td><td class="num">67</td><td class="num">1発</td><td class="num">5</td></tr>
+            <tr><td>SVD<span class="kind">スナイパーライフル</span></td><td class="num">8.1</td><td class="num">200</td><td class="num">0.6秒</td><td class="num">10</td></tr>
+            <tr><td>L96A1<span class="kind">スナイパーライフル</span></td><td class="num">31.3</td><td class="num">41</td><td class="num">1発</td><td class="num">5</td></tr>
+            <tr><td>エオカ<span class="kind">手作り散弾銃（不発あり）</span></td><td class="num">3.1×8</td><td class="num">67</td><td class="num">1発</td><td class="num">1</td></tr>
+            <tr><td>火縄銃<span class="kind">しゃがむと三千世界（5丁撃ち）</span></td><td class="num">6.3</td><td class="num">44</td><td class="num">4.05秒</td><td class="num">10</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">TTKは体力20の相手の体に当て続けて倒すまでの時間です（ヘッドショット、距離による減衰は入れていません。ショットガンは全ペレット命中時）。同じ数字は、ゲーム内でも銃の名前の下に表示されます。</p>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">03</span><h2>できること</h2><span class="rule"></span></div>
+      <div class="features">
+        <div class="feature"><span class="fk">AIM</span><h3>先読みと命中補正</h3><p>視点を振りながら撃つと、その速さに合わせて少し先に弾が飛びます。弾の通り道のすぐ近くにいる相手にも当たります。</p></div>
+        <div class="feature"><span class="fk">SCOPE</span><h3>のぞきこみ・スコープ</h3><p>しゃがむと構えてのぞきこみます。SVDとL96A1はスコープ表示とズームになります。</p></div>
+        <div class="feature"><span class="fk">RELOAD</span><h3>マガジン式リロード</h3><p>弾切れでマガジンを持っていれば自動でリロード。途中で持ちかえると、やり直しになります。</p></div>
+        <div class="feature"><span class="fk">SETTINGS</span><h3>「設定」アイテム</h3><p>フォームで銃ごとのダメージ、装弾数、拡散、camerashake、弾速などを変えられます。設定はワールドに保存されます。</p></div>
+        <div class="feature"><span class="fk">RANGE</span><h3>射撃練習の的</h3><p>石炭を使うと動く的、木炭を使うとほかのプレイヤーを的にできます。距離や速さも決められます。</p></div>
+        <div class="feature"><span class="fk">REPLAY</span><h3>弾道の記録</h3><p>しゃがんで石炭か木炭を使うと、過去20発の弾道と、撃った瞬間の的の位置を10秒間表示します。</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">04</span><h2>操作</h2><span class="rule"></span></div>
+      <div class="controls">
+        <div class="control"><span class="k">撃つ</span><span>右クリック（長押しで連射できる銃は連射）</span></div>
+        <div class="control"><span class="k">のぞきこむ</span><span>しゃがむ</span></div>
+        <div class="control"><span class="k">リロード</span><span>弾切れで自動。マガジンを使っても手動でリロードできます</span></div>
+        <div class="control"><span class="k">入手</span><span>クリエイティブの「装備」タブの「銃」グループ。マガジンと弾もあります</span></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">05</span><h2>注意</h2><span class="rule"></span></div>
+      <div class="note">
+        <ul>
+          <li>プレイヤーの見た目と動きのファイル（player.json / player.entity.json）を書きかえるアドオンです。同じファイルを書きかえるほかのアドオンとは同時に使えません（あとから入れたほうだけが効きます）。</li>
+          <li>ワールドに入れるのはビヘイビアパックだけで大丈夫です。リソースパックはいっしょに入ります。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">06</span><h2>使用素材のクレジット</h2><span class="rule"></span></div>
+      <p class="soft">銃の3Dモデルは、以下の作品を元に、Minecraft Bedrock向けに変換・加工（改変）したものです。制作者の皆さんに感謝します。同じ内容を、パックの中の CREDITS.txt にも入れています。</p>
+      <div class="credits">
+        <div class="credit"><span class="gun">M16</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/m16a1-low-poly-bcf421747bea4afd942381cefa498a02">M16A1 Low Poly</a>" by <a href="https://sketchfab.com/aBraM_">aBraM_</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="gun">M1928A1</span><span class="txt">Based on "<a href="https://www.cgtrader.com/free-3d-models/military/gun/free-thompson-submachine-gun">Free Thompson Submachine Gun</a>" by LiHagan (CGTrader Royalty Free License)</span></div>
+        <div class="credit"><span class="gun">UZI(silencer)</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/uzi-submachine-gun-c56bfac12c564b7fb5fa9e833f35603e">UZI submachine gun</a>" by <a href="https://sketchfab.com/nurbolnygmanov">Jusai</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="gun">Model 37</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/m37-ithaca-shotgun-7dc579288a31495e86e9c4d4d3ccba04">M37 Ithaca Shotgun</a>" by <a href="https://sketchfab.com/northernpike">Gustaw Mackay</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="gun">SVD</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/svd-free-2b55be458c2849a6a5baab0e2ce26056">SVD [FREE]</a>" by <a href="https://sketchfab.com/KV4GA">CombatCraft | UnitedPechoraRecords Studio</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="gun">L96A1</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/l96a1-d8ca7419de044c8e88847c90eda3f151">L96A1</a>" by <a href="https://sketchfab.com/arc4de">arc4de</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="gun">エオカ</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/just-a-torch-eoka-pistol-26a21e1131984c0ba851142db44dffd7">"Just A Torch" Eoka Pistol</a>" by <a href="https://sketchfab.com/divadan">Liam Moffitt</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="gun">火縄銃・三千世界</span><span class="txt">「<a href="https://seiga.nicovideo.jp/seiga/im9559443">俺得版ノッブの銃 ver2.00</a>」 モデリング: kinoko さん（<a href="https://bowlroll.net/file/131588">配布ページ</a>）を改造して使用しています。</span></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="cta">
+        <div>
+          <h3>ダウンロード</h3>
+          <p>v1.0.0 — .mcaddon ファイルです。開くとMinecraftに読み込まれます。</p>
+        </div>
+        <div>
+          <a class="dl" href="https://github.com/lzcat26-dev/lzcat26-dev.github.io/releases/download/guns-v1.0.0/lz_guns.v1.0.0.mcaddon">ダウンロード →</a>
+          <p class="dl-sub">v1.0.0（約9.5MB）</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>LZ GUNS — Minecraft Bedrock Addon</span>
+      <span><a href="index.html">LZCのアドオン倉庫</a></span>
+    </footer>
+  </div>
+</body>
+</html>

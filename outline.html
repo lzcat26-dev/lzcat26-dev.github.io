@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LZ OUTLINE | LZCのアドオン倉庫</title>
+<meta name="description" content="プレイヤーに16色の、壁越しに見えるアウトラインを付けるMinecraft Bedrock向けアドオン。タグだけで、全員・同じ色どうし・特定の人だけ、の3通りの見せ方ができます。">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1868783573127394" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #0e1013;
+    --bg-raised: #161a1f;
+    --bg-sunk: #0a0b0d;
+    --ink: #e8ebee;
+    --ink-soft: #8d949c;
+    --line: #262b31;
+    --wall: #22262c;
+    --wall-line: #2c3138;
+    --accent: #3ab3da;
+
+    --font-body: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  code, .mono { font-family: var(--font-mono); }
+
+  .wrap { max-width: 64rem; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+  .back { display: inline-block; margin: 1.5rem 0 0; font-size: 0.85rem; color: var(--ink-soft); text-decoration: none; }
+  .back:hover { color: var(--ink); }
+
+  /* ===== hero：壁の向こうの人影が、色つきのふちだけ見えている ===== */
+  .hero {
+    margin-top: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 0.4rem;
+    overflow: hidden;
+    background: var(--bg-sunk);
+  }
+  .hero-scene { display: block; width: 100%; height: auto; }
+  .hero-body { padding: clamp(1.25rem, 3vw, 2rem); display: grid; gap: 0.6rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.16em; color: var(--ink-soft); margin: 0; }
+  .hero h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.2; letter-spacing: 0.04em; font-family: var(--font-mono); }
+  .hero .tagline { margin: 0; color: var(--ink-soft); font-size: 1rem; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.25rem 0 0; }
+  .pill {
+    font-size: 0.78rem; padding: 0.25rem 0.7rem; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--ink-soft); background: var(--bg-raised);
+  }
+
+  section { margin-top: clamp(2.5rem, 6vw, 3.5rem); }
+  .head { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.1rem; }
+  .head .idx { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); }
+  .head h2 { margin: 0; font-size: 1.1rem; letter-spacing: 0.02em; }
+  .head .rule { flex: 1; height: 1px; background: var(--line); }
+  p { margin: 0 0 0.9rem; }
+  .soft { color: var(--ink-soft); }
+
+  /* ===== 3つの見え方 ===== */
+  .modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; }
+  .mode {
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: 0.4rem;
+    padding: 1.1rem 1.1rem 1.2rem; display: grid; gap: 0.7rem; align-content: start;
+  }
+  .mode svg { width: 100%; height: auto; display: block; background: var(--bg-sunk); border-radius: 0.25rem; }
+  .mode h3 { margin: 0; font-size: 1rem; }
+  .mode .tagname {
+    font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink);
+    background: var(--bg-sunk); border: 1px solid var(--line); border-radius: 0.25rem;
+    padding: 0.35rem 0.55rem; word-break: break-all;
+  }
+  .mode p { margin: 0; font-size: 0.88rem; color: var(--ink-soft); }
+
+  /* ===== 16色 ===== */
+  .colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr)); gap: 0.6rem; }
+  .swatch {
+    display: flex; align-items: center; gap: 0.7rem; text-align: left;
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: 0.35rem;
+    padding: 0.55rem 0.7rem; color: var(--ink); cursor: pointer; font: inherit;
+    transition: border-color 0.15s ease;
+  }
+  .swatch:hover, .swatch:focus-visible { border-color: var(--c); outline: none; }
+  .swatch .chip {
+    width: 1.6rem; height: 1.6rem; border-radius: 0.25rem; flex: none;
+    background: transparent; border: 3px solid var(--c); box-shadow: 0 0 8px -1px var(--c);
+  }
+  .swatch .txt { display: grid; line-height: 1.35; min-width: 0; }
+  .swatch .jp { font-size: 0.85rem; }
+  .swatch .en { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-soft); }
+  .copy-note { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.7rem; min-height: 1.4em; }
+
+  /* ===== コマンド ===== */
+  .cmds { display: grid; gap: 0.6rem; }
+  .cmd { background: var(--bg-sunk); border: 1px solid var(--line); border-radius: 0.35rem; padding: 0.8rem 0.9rem; }
+  .cmd .label { font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 0.3rem; }
+  .cmd code { display: block; font-size: 0.85rem; white-space: pre-wrap; word-break: break-all; }
+
+  .note {
+    background: var(--bg-raised); border: 1px solid var(--line); border-left: 3px solid #fed83d;
+    border-radius: 0.35rem; padding: 0.9rem 1rem; font-size: 0.9rem;
+  }
+  .note p:last-child { margin-bottom: 0; }
+  .note ul { margin: 0; padding-left: 1.2rem; }
+
+  .credit {
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: 0.35rem;
+    padding: 0.9rem 1rem; font-size: 0.9rem;
+  }
+  .credit p:last-child { margin-bottom: 0; }
+
+  /* ===== ダウンロード ===== */
+  .cta {
+    display: flex; justify-content: space-between; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: 0.4rem;
+    padding: clamp(1.1rem, 3vw, 1.6rem);
+  }
+  .cta h3 { margin: 0 0 0.3rem; font-size: 1.1rem; }
+  .cta p { margin: 0; font-size: 0.88rem; color: var(--ink-soft); }
+  .dl {
+    display: inline-block; text-decoration: none; font-weight: 700;
+    background: var(--accent); color: #06121a; padding: 0.75rem 1.4rem; border-radius: 0.35rem;
+  }
+  .dl:hover, .dl:focus-visible { filter: brightness(1.1); outline: none; }
+  .dl-sub { font-size: 0.75rem; color: var(--ink-soft); margin: 0.4rem 0 0; text-align: center; }
+
+  footer {
+    margin: clamp(3rem, 7vw, 4.5rem) 0 2.5rem; padding-top: 1.4rem; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--ink-soft);
+  }
+  footer a { color: inherit; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pulse { animation: pulse 2.4s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← 作品一覧へ戻る</a>
+
+    <div class="hero">
+      <!-- 壁の向こうに3人。本体は壁に隠れて見えず、色つきのふちだけが透けて見えている -->
+      <svg class="hero-scene" viewBox="0 0 960 300" role="img" aria-label="壁の向こうにいる3人のプレイヤーの輪郭が、赤・水色・黄緑で透けて見えている図">
+        <defs>
+          <pattern id="brick" width="60" height="30" patternUnits="userSpaceOnUse">
+            <rect width="60" height="30" fill="#22262c"/>
+            <path d="M0 0.5H60M0 15.5H60M0.5 0V15M30.5 15V30" stroke="#2c3138" stroke-width="1"/>
+          </pattern>
+          <g id="figure">
+            <rect x="-12" y="-96" width="24" height="24" rx="1"/>
+            <rect x="-12" y="-70" width="24" height="36" rx="1"/>
+            <rect x="-24" y="-70" width="11" height="36" rx="1"/>
+            <rect x="13" y="-70" width="11" height="36" rx="1"/>
+            <rect x="-12" y="-33" width="11" height="33" rx="1"/>
+            <rect x="1" y="-33" width="11" height="33" rx="1"/>
+          </g>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <rect width="960" height="300" fill="#0a0b0d"/>
+        <rect x="0" y="252" width="960" height="48" fill="#111317"/>
+        <rect x="140" y="40" width="680" height="220" fill="url(#brick)"/>
+        <g fill="none" stroke-width="2.5" filter="url(#glow)">
+          <use href="#figure" x="300" y="245" stroke="#b02e26" class="pulse"/>
+          <use href="#figure" x="480" y="245" stroke="#3ab3da"/>
+          <use href="#figure" x="660" y="245" stroke="#80c71f" class="pulse"/>
+        </g>
+      </svg>
+      <div class="hero-body">
+        <p class="eyebrow">MINECRAFT BEDROCK ADDON</p>
+        <h1>LZ OUTLINE</h1>
+        <p class="tagline">壁の向こうにいても、ふちだけは見えている。</p>
+      </div>
+    </div>
+
+    <div class="pills">
+      <span class="pill">Minecraft Bedrock 1.26.20 以降</span>
+      <span class="pill">プレイヤー用</span>
+      <span class="pill">16色</span>
+      <span class="pill">タグだけで操作</span>
+    </div>
+
+    <section>
+      <div class="head"><span class="idx">01</span><h2>概要</h2><span class="rule"></span></div>
+      <p>プレイヤーに、壁越しに見える色つきのアウトラインを付けるアドオンです。色は16色。付け外しは <code>/tag</code> コマンドだけで、スクリプトを書かなくても使えます。</p>
+      <p class="soft">チーム戦の味方表示、鬼ごっこの鬼の位置、人狼系ゲームの仲間どうしの目印などに。</p>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">02</span><h2>3つの見え方</h2><span class="rule"></span></div>
+      <div class="modes">
+        <div class="mode">
+          <svg viewBox="0 0 240 90" aria-hidden="true">
+            <g fill="none" stroke-width="2">
+              <circle cx="40" cy="45" r="14" stroke="#8d949c"/>
+              <circle cx="120" cy="45" r="14" stroke="#b02e26"/>
+              <circle cx="200" cy="45" r="14" stroke="#8d949c"/>
+              <path d="M56 45H102M184 45H138" stroke="#b02e26" stroke-dasharray="4 4"/>
+              <path d="M98 40l5 5-5 5M142 40l-5 5 5 5" stroke="#b02e26"/>
+            </g>
+          </svg>
+          <h3>全員から見える</h3>
+          <div class="tagname">outline_all_&lt;色&gt;</div>
+          <p>だれからでも見えます。ボスや鬼など、みんなに知らせたい相手に。</p>
+        </div>
+        <div class="mode">
+          <svg viewBox="0 0 240 90" aria-hidden="true">
+            <g fill="none" stroke-width="2">
+              <circle cx="40" cy="45" r="14" stroke="#3ab3da"/>
+              <circle cx="120" cy="45" r="14" stroke="#3ab3da"/>
+              <circle cx="200" cy="45" r="14" stroke="#8d949c"/>
+              <path d="M56 45H104" stroke="#3ab3da" stroke-dasharray="4 4"/>
+              <path d="M60 40l-5 5 5 5M100 40l5 5-5 5" stroke="#3ab3da"/>
+              <path d="M184 45H140" stroke="#8d949c" stroke-dasharray="2 6"/>
+              <path d="M150 38l14 14M164 38l-14 14" stroke="#8d949c"/>
+            </g>
+          </svg>
+          <h3>同じ色どうしだけ</h3>
+          <div class="tagname">outline_&lt;色&gt;</div>
+          <p>同じ色のタグを持っている人どうしにだけ見えます。ほかの人からは見えません。仲間の目印に。</p>
+        </div>
+        <div class="mode">
+          <svg viewBox="0 0 240 90" aria-hidden="true">
+            <g fill="none" stroke-width="2">
+              <circle cx="40" cy="45" r="14" stroke="#e8ebee"/>
+              <path d="M34 45h12M40 39v12" stroke="#e8ebee" stroke-width="1.5"/>
+              <circle cx="120" cy="45" r="14" stroke="#80c71f"/>
+              <circle cx="200" cy="45" r="14" stroke="#8d949c"/>
+              <path d="M56 45H102" stroke="#80c71f" stroke-dasharray="4 4"/>
+              <path d="M98 40l5 5-5 5" stroke="#80c71f"/>
+            </g>
+          </svg>
+          <h3>特定の人だけ（一方的）</h3>
+          <div class="tagname">見られる側 outline_to_&lt;名前&gt;_&lt;色&gt;<br>見る側 outline_see_&lt;名前&gt;</div>
+          <p><code>outline_see_&lt;名前&gt;</code> を持っている人からだけ見えます。見られる側からは見えません。&lt;名前&gt;は自由に決められます。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">03</span><h2>16色</h2><span class="rule"></span></div>
+      <div class="colors" id="colors"></div>
+      <p class="copy-note" id="copyNote" aria-live="polite">色をクリックすると、その色を付けるコマンド（全員から見える）をコピーします。</p>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">04</span><h2>使い方</h2><span class="rule"></span></div>
+      <div class="cmds">
+        <div class="cmd"><div class="label">近くのプレイヤーを、全員から見える赤にする</div><code>/tag @p add outline_all_red</code></div>
+        <div class="cmd"><div class="label">赤チームの人どうしにだけ見えるようにする</div><code>/tag @a[tag=team_red] add outline_red</code></div>
+        <div class="cmd"><div class="label">「探偵」だけに、容疑者を黄色で見せる</div><code>/tag @a[tag=suspect] add outline_to_detective_yellow
+/tag @a[tag=detective] add outline_see_detective</code></div>
+        <div class="cmd"><div class="label">消すとき</div><code>/tag @p remove outline_all_red</code></div>
+      </div>
+      <p class="soft" style="margin-top:1rem;">同じ種類のタグが2つ以上付いているときは、上の16色の並びで先にある色になります。一人称視点では、自分のアウトラインは表示されません。</p>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">05</span><h2>注意</h2><span class="rule"></span></div>
+      <div class="note">
+        <ul>
+          <li>プレイヤーの見た目と動きのファイル（player.json / player.entity.json）を書きかえるアドオンです。同じファイルを書きかえる、ほかのアドオンとは同時に使えません（あとから入れたほうだけが効きます）。</li>
+          <li>ワールドに入れるのはビヘイビアパックだけで大丈夫です。リソースパックはいっしょに入ります。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">06</span><h2>クレジット</h2><span class="rule"></span></div>
+      <div class="credit">
+        <p>このアドオンは、@kashiwa_mocchi さんの「発光アドオン - Glowing Addon」を使用し、改造して作成しています。</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="cta">
+        <div>
+          <h3>ダウンロード</h3>
+          <p>v1.0.0 — .mcaddon ファイルです。開くとMinecraftに読み込まれます。</p>
+        </div>
+        <div>
+          <a class="dl" href="https://github.com/lzcat26-dev/lzcat26-dev.github.io/releases/download/outline-v1.0.0/lz_outline.v1.0.0.mcaddon">ダウンロード →</a>
+          <p class="dl-sub">v1.0.0（約15KB）</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>LZ OUTLINE — Minecraft Bedrock Addon</span>
+      <span><a href="index.html">LZCのアドオン倉庫</a></span>
+    </footer>
+  </div>
+
+<script>
+(function () {
+  var COLORS = [
+    ["white", "白", "#f9fffe"], ["orange", "オレンジ", "#f9801d"], ["magenta", "赤紫", "#c74ebd"], ["light_blue", "空色", "#3ab3da"],
+    ["yellow", "黄色", "#fed83d"], ["lime", "黄緑", "#80c71f"], ["pink", "ピンク", "#f38baa"], ["gray", "灰色", "#474f52"],
+    ["light_gray", "薄い灰色", "#9d9d97"], ["cyan", "青緑", "#169c9c"], ["purple", "紫", "#8932b8"], ["blue", "青", "#3c44aa"],
+    ["brown", "茶色", "#835432"], ["green", "緑", "#5e7c16"], ["red", "赤", "#b02e26"], ["black", "黒", "#1d1d21"]
+  ];
+  var box = document.getElementById("colors");
+  var note = document.getElementById("copyNote");
+  COLORS.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "swatch";
+    // 黒と灰色は背景に沈むので、見本のふちだけ少し明るくする
+    b.style.setProperty("--c", c[0] === "black" ? "#5a5a60" : c[2]);
+    b.innerHTML = '<span class="chip"></span><span class="txt"><span class="jp">' + c[1] + '</span><span class="en">' + c[0] + '</span></span>';
+    b.addEventListener("click", function () {
+      var cmd = "/tag @p add outline_all_" + c[0];
+      var done = function () { note.textContent = "コピーしました: " + cmd; };
+      try {
+        navigator.clipboard.writeText(cmd).then(done, function () { note.textContent = cmd; });
+      } catch (e) { note.textContent = cmd; }
+    });
+    box.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
