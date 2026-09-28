@@ -132,6 +132,11 @@
   }
   .dl:hover, .dl:focus-visible { filter: brightness(1.1); outline: none; }
   .dl-sub { font-size: 0.75rem; color: var(--ink-soft); margin: 0.4rem 0 0; text-align: center; }
+  .dl-list { display: grid; gap: 0.75rem; width: 100%; }
+  .dl-item { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+  .dl-item h4 { margin: 0 0 0.2rem; font-size: 0.95rem; }
+  .dl-item p { margin: 0; font-size: 0.84rem; color: var(--ink-soft); }
+  .dl.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
 
   footer {
     margin: clamp(3rem, 7vw, 4.5rem) 0 2.5rem; padding-top: 1.4rem; border-top: 1px solid var(--line);
@@ -272,7 +277,7 @@
       <div class="head"><span class="idx">05</span><h2>注意</h2><span class="rule"></span></div>
       <div class="note">
         <ul>
-          <li>プレイヤーの見た目と動きのファイル（player.json / player.entity.json）を書きかえるアドオンです。同じファイルを書きかえる、ほかのアドオンとは同時に使えません（あとから入れたほうだけが効きます）。</li>
+          <li>プレイヤーの見た目と動きのファイル（player.json / player.entity.json）を書きかえるアドオンです。同じファイルを書きかえる、ほかのアドオンとは同時に使えません（パックの一覧で上にあるほうだけが効きます）。<a href="lzguns.html">LZ GUNS</a>といっしょに使うときは、下の「LZ GUNS対応版」を使ってください。</li>
           <li>ワールドに入れるのはビヘイビアパックだけで大丈夫です。リソースパックはいっしょに入ります。</li>
         </ul>
       </div>
@@ -289,11 +294,29 @@
       <div class="cta">
         <div>
           <h3>ダウンロード</h3>
-          <p>v1.0.0 — .mcaddon ファイルです。開くとMinecraftに読み込まれます。</p>
+          <p>v1.0.0 — .mcaddon ファイルです。開くとMinecraftに読み込まれます。使い方に合わせて、どちらか1つを入れてください。</p>
         </div>
-        <div>
-          <a class="dl" href="https://github.com/lzcat26-dev/lzcat26-dev.github.io/releases/download/outline-v1.0.0/lz_outline.v1.0.0.mcaddon">ダウンロード →</a>
-          <p class="dl-sub">v1.0.0（約15KB）</p>
+        <div class="dl-list">
+          <div class="dl-item">
+            <div>
+              <h4>LZ OUTLINE</h4>
+              <p>ふつうの版。これだけで使うとき。</p>
+            </div>
+            <div>
+              <a class="dl" href="https://github.com/lzcat26-dev/lzcat26-dev.github.io/releases/download/outline-v1.0.0/lz_outline.v1.0.0.mcaddon">ダウンロード →</a>
+              <p class="dl-sub">v1.0.0（約19KB）</p>
+            </div>
+          </div>
+          <div class="dl-item">
+            <div>
+              <h4>LZ OUTLINE（LZ GUNS対応版）</h4>
+              <p><a href="lzguns.html">LZ GUNS</a>といっしょに使うとき。LZ GUNSも入れて、パックの一覧でこちらを<strong>LZ GUNSより上</strong>に置いてください。</p>
+            </div>
+            <div>
+              <a class="dl ghost" href="https://github.com/lzcat26-dev/lzcat26-dev.github.io/releases/download/outline-lzguns-v1.0.0/lz_outline_for_lzguns.v1.0.0.mcaddon">ダウンロード →</a>
+              <p class="dl-sub">v1.0.0（約21KB）</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
