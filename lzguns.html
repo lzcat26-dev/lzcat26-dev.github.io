@@ -74,6 +74,14 @@
   th.num { text-align: right; }
   tr:last-child td { border-bottom: none; }
   td .kind { display: block; font-size: 0.72rem; color: var(--ink-soft); }
+  .gun-cell { display: flex; align-items: center; gap: 0.7rem; }
+  .gun-icon { width: 36px; height: 36px; padding: 2px; image-rendering: pixelated; flex: none; background: #d9d5c3; border-radius: 0.25rem; } /* アイコンは黒っぽいので明るい下地に置く */
+  /* 持っているところ */
+  .shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 0.9rem; }
+  .shot { margin: 0; background: var(--bg-raised); border: 1px solid var(--line); border-radius: 0.3rem; overflow: hidden; }
+  .shot > img { display: block; width: 100%; height: auto; }
+  .shot figcaption { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.85rem; }
+  .shot figcaption img { width: 24px; height: 24px; padding: 1px; image-rendering: pixelated; background: #d9d5c3; border-radius: 0.2rem; }
   .table-note { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.6rem; }
 
   /* ===== 特徴 ===== */
@@ -149,14 +157,14 @@
             <tr><th>銃</th><th class="num">ダメージ</th><th class="num">RPM</th><th class="num">TTK</th><th class="num">装弾数</th></tr>
           </thead>
           <tbody>
-            <tr><td>M16<span class="kind">アサルトライフル</span></td><td class="num">3.8</td><td class="num">400</td><td class="num">0.75秒</td><td class="num">30</td></tr>
-            <tr><td>M1928A1<span class="kind">サブマシンガン</span></td><td class="num">3.1</td><td class="num">600</td><td class="num">0.6秒</td><td class="num">20</td></tr>
-            <tr><td>UZI(silencer)<span class="kind">サブマシンガン</span></td><td class="num">2.5</td><td class="num">900</td><td class="num">0.45秒</td><td class="num">25</td></tr>
-            <tr><td>Model 37<span class="kind">ショットガン</span></td><td class="num">1.9×12</td><td class="num">67</td><td class="num">1発</td><td class="num">5</td></tr>
-            <tr><td>SVD<span class="kind">スナイパーライフル</span></td><td class="num">8.1</td><td class="num">200</td><td class="num">0.6秒</td><td class="num">10</td></tr>
-            <tr><td>L96A1<span class="kind">スナイパーライフル</span></td><td class="num">31.3</td><td class="num">41</td><td class="num">1発</td><td class="num">5</td></tr>
-            <tr><td>エオカ<span class="kind">手作り散弾銃（不発あり）</span></td><td class="num">3.1×8</td><td class="num">67</td><td class="num">1発</td><td class="num">1</td></tr>
-            <tr><td>火縄銃<span class="kind">しゃがむと三千世界（5丁撃ち）</span></td><td class="num">6.3</td><td class="num">44</td><td class="num">4.05秒</td><td class="num">10</td></tr>
+            <tr><td><span class="gun-cell"><img class="gun-icon" src="images/lzg-icon-m16.png" alt="" width="36" height="36"><span>M16<span class="kind">アサルトライフル</span></span></span></td><td class="num">3.8</td><td class="num">400</td><td class="num">0.75秒</td><td class="num">30</td></tr>
+            <tr><td><span class="gun-cell"><img class="gun-icon" src="images/lzg-icon-m1928.png" alt="" width="36" height="36"><span>M1928A1<span class="kind">サブマシンガン</span></span></span></td><td class="num">3.1</td><td class="num">600</td><td class="num">0.6秒</td><td class="num">20</td></tr>
+            <tr><td><span class="gun-cell"><img class="gun-icon" src="images/lzg-icon-uzi.png" alt="" width="36" height="36"><span>UZI(silencer)<span class="kind">サブマシンガン</span></span></span></td><td class="num">2.5</td><td class="num">900</td><td class="num">0.45秒</td><td class="num">25</td></tr>
+            <tr><td><span class="gun-cell"><img class="gun-icon" src="images/lzg-icon-model37.png" alt="" width="36" height="36"><span>Model 37<span class="kind">ショットガン</span></span></span></td><td class="num">1.9×12</td><td class="num">67</td><td class="num">1発</td><td class="num">5</td></tr>
+            <tr><td><span class="gun-cell"><img class="gun-icon" src="images/lzg-icon-svd.png" alt="" width="36" height="36"><span>SVD<span class="kind">スナイパーライフル</span></span></span></td><td class="num">8.1</td><td class="num">200</td><td class="num">0.6秒</td><td class="num">10</td></tr>
+            <tr><td><span class="gun-cell"><img class="gun-icon" src="images/lzg-icon-l96a1.png" alt="" width="36" height="36"><span>L96A1<span class="kind">スナイパーライフル</span></span></span></td><td class="num">31.3</td><td class="num">41</td><td class="num">1発</td><td class="num">5</td></tr>
+            <tr><td><span class="gun-cell"><img class="gun-icon" src="images/lzg-icon-eoka.png" alt="" width="36" height="36"><span>エオカ<span class="kind">手作り散弾銃（不発あり）</span></span></span></td><td class="num">3.1×8</td><td class="num">67</td><td class="num">1発</td><td class="num">1</td></tr>
+            <tr><td><span class="gun-cell"><img class="gun-icon" src="images/lzg-icon-hinawa.png" alt="" width="36" height="36"><span>火縄銃<span class="kind">しゃがむと三千世界（5丁撃ち）</span></span></span></td><td class="num">6.3</td><td class="num">44</td><td class="num">4.05秒</td><td class="num">10</td></tr>
           </tbody>
         </table>
       </div>
@@ -164,7 +172,19 @@
     </section>
 
     <section>
-      <div class="head"><span class="idx">03</span><h2>できること</h2><span class="rule"></span></div>
+      <div class="head"><span class="idx">03</span><h2>持っているところ</h2><span class="rule"></span></div>
+      <div class="shots">
+        <figure class="shot"><img src="images/lzg-hold-m16.jpg" alt="M16を持っているところ" loading="lazy"><figcaption><img src="images/lzg-icon-m16.png" alt="">M16</figcaption></figure>
+        <figure class="shot"><img src="images/lzg-hold-m1928.jpg" alt="M1928A1を持っているところ" loading="lazy"><figcaption><img src="images/lzg-icon-m1928.png" alt="">M1928A1</figcaption></figure>
+        <figure class="shot"><img src="images/lzg-hold-uzi.jpg" alt="UZI(silencer)を持っているところ" loading="lazy"><figcaption><img src="images/lzg-icon-uzi.png" alt="">UZI(silencer)</figcaption></figure>
+        <figure class="shot"><img src="images/lzg-hold-model37.jpg" alt="Model 37を持っているところ" loading="lazy"><figcaption><img src="images/lzg-icon-model37.png" alt="">Model 37</figcaption></figure>
+        <figure class="shot"><img src="images/lzg-hold-svd.jpg" alt="SVDを持っているところ" loading="lazy"><figcaption><img src="images/lzg-icon-svd.png" alt="">SVD</figcaption></figure>
+        <figure class="shot"><img src="images/lzg-hold-l96a1.jpg" alt="L96A1を持っているところ" loading="lazy"><figcaption><img src="images/lzg-icon-l96a1.png" alt="">L96A1</figcaption></figure>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">04</span><h2>できること</h2><span class="rule"></span></div>
       <div class="features">
         <div class="feature"><span class="fk">AIM</span><h3>先読みと命中補正</h3><p>視点を振りながら撃つと、その速さに合わせて少し先に弾が飛びます。弾の通り道のすぐ近くにいる相手にも当たります。</p></div>
         <div class="feature"><span class="fk">SCOPE</span><h3>のぞきこみ・スコープ</h3><p>しゃがむと構えてのぞきこみます。SVDとL96A1はスコープ表示とズームになります。</p></div>
@@ -176,7 +196,7 @@
     </section>
 
     <section>
-      <div class="head"><span class="idx">04</span><h2>操作</h2><span class="rule"></span></div>
+      <div class="head"><span class="idx">05</span><h2>操作</h2><span class="rule"></span></div>
       <div class="controls">
         <div class="control"><span class="k">撃つ</span><span>右クリック（長押しで連射できる銃は連射）</span></div>
         <div class="control"><span class="k">のぞきこむ</span><span>しゃがむ</span></div>
@@ -186,7 +206,7 @@
     </section>
 
     <section>
-      <div class="head"><span class="idx">05</span><h2>注意</h2><span class="rule"></span></div>
+      <div class="head"><span class="idx">06</span><h2>注意</h2><span class="rule"></span></div>
       <div class="note">
         <ul>
           <li>プレイヤーの見た目と動きのファイル（player.json / player.entity.json）を書きかえるアドオンです。同じファイルを書きかえるほかのアドオンとは同時に使えません（パックの一覧で上にあるほうだけが効きます）。<a href="outline.html">LZ OUTLINE</a>は、いっしょに使える「LZ GUNS対応版」があります。</li>
@@ -196,7 +216,7 @@
     </section>
 
     <section>
-      <div class="head"><span class="idx">06</span><h2>使用素材のクレジット</h2><span class="rule"></span></div>
+      <div class="head"><span class="idx">07</span><h2>使用素材のクレジット</h2><span class="rule"></span></div>
       <p class="soft">銃の3Dモデルは、以下の作品を元に、Minecraft Bedrock向けに変換・加工（改変）したものです。制作者の皆さんに感謝します。同じ内容を、パックの中の CREDITS.txt にも入れています。</p>
       <div class="credits">
         <div class="credit"><span class="gun">M16</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/m16a1-low-poly-bcf421747bea4afd942381cefa498a02">M16A1 Low Poly</a>" by <a href="https://sketchfab.com/aBraM_">aBraM_</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
