@@ -88,6 +88,10 @@
   .job dd { margin: 0; }
   .job dd.ult { font-weight: 700; color: var(--c); }
 
+  /* ===== ジョブ紹介の 動画(YouTube) ===== */
+  .video { position: relative; aspect-ratio: 16 / 9; border: 1px solid var(--line); background: #000; margin-bottom: 1.2rem; }
+  .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+
   /* ===== マップ・スクショ(画像が まだ ないときは 枠だけ)===== */
   .maps { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: 0.9rem; }
   .map { margin: 0; background: var(--bg-raised); border: 1px solid var(--line); overflow: hidden; }
@@ -190,6 +194,7 @@
     <section>
       <div class="head"><span class="idx">03</span><span class="slash"></span><h2>ジョブ</h2><span class="en">JOBS</span><span class="rule"></span></div>
       <p class="soft">ジョブは復活するたびに選び直せます。くわしい操作は、ゲームの中のジョブ説明で見られます。</p>
+      <div class="video"><iframe src="https://www.youtube.com/embed/9WxGQSI318s" title="Relic Crash ジョブ紹介" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
       <div class="jobs">
         <article class="job" style="--c:#ff5555">
           <div class="pic"><img src="images/rc-job-swordsman.png" alt="剣士のシルエット" loading="lazy"></div>
