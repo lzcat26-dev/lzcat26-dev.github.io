@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relic Clash | LZCのアドオン倉庫</title>
+<meta name="description" content="Minecraft Bedrock向けのPvPワールド。剣士・レンジャー・弓兵・アサシン・ボマー・エアレイダー・グール・魔法使い・武士の9つのジョブと、5つのマップで点を取り合う。">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1868783573127394" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #07080a;
+    --bg-raised: #0f1114;
+    --bg-sunk: #040506;
+    --ink: #f2f2f0;
+    --ink-soft: #8d9096;
+    --line: #1f2228;
+    --line-strong: #2e3239;
+    --accent: #ffffff;
+
+    --font-body: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  img { max-width: 100%; }
+
+  .wrap { max-width: 66rem; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+  .back { display: inline-block; margin: 1.5rem 0 0; font-size: 0.85rem; color: var(--ink-soft); text-decoration: none; }
+  .back:hover { color: var(--ink); }
+
+  /* ===== hero: ロゴの GIF ===== */
+  .hero { margin-top: 1.25rem; border: 1px solid var(--line); overflow: hidden; background: #000; }
+  .hero img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+  .hero-text { display: flex; justify-content: space-between; align-items: end; gap: 1rem 2rem; flex-wrap: wrap; margin-top: 1.25rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.2em; color: var(--ink-soft); margin: 0 0 0.2rem; }
+  h1 { margin: 0; font-size: clamp(2rem, 6vw, 3rem); font-weight: 800; font-style: italic; letter-spacing: 0.04em; line-height: 1.1; transform: skewX(-6deg); }
+  .tagline { margin: 0; color: var(--ink-soft); max-width: 30rem; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.25rem 0 0; }
+  .pill { font-size: 0.78rem; padding: 0.25rem 0.75rem; border: 1px solid var(--line-strong); color: var(--ink-soft); background: var(--bg-raised); transform: skewX(-12deg); }
+  .pill > span { display: inline-block; transform: skewX(12deg); }
+
+  /* ===== 見出し: 斜めの 線(ロゴの 刃)===== */
+  section { margin-top: clamp(3rem, 7vw, 4.5rem); }
+  .head { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; }
+  .head .idx { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-soft); }
+  .head .slash { width: 2px; height: 1.6rem; background: var(--accent); transform: skewX(-24deg); }
+  .head h2 { margin: 0; font-size: 1.25rem; font-weight: 800; font-style: italic; letter-spacing: 0.03em; }
+  .head .en { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.18em; color: var(--ink-soft); }
+  .head .rule { flex: 1; height: 1px; background: var(--line); }
+  p { margin: 0 0 0.9rem; }
+  .soft { color: var(--ink-soft); }
+  .small { font-size: 0.82rem; }
+
+  /* ===== ルール ===== */
+  .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.75rem; }
+  .rule-card { background: var(--bg-raised); border: 1px solid var(--line); padding: 1rem 1.1rem; display: grid; gap: 0.2rem; }
+  .rule-card .pt { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 700; font-style: italic; line-height: 1.2; }
+  .rule-card .pt.minus { color: #ff6b6b; }
+  .rule-card .what { font-weight: 700; font-size: 0.95rem; }
+  .rule-card .how { font-size: 0.82rem; color: var(--ink-soft); }
+  .win { margin-top: 0.9rem; padding: 0.9rem 1.1rem; border: 1px solid var(--line-strong); border-left: 3px solid var(--accent); background: var(--bg-raised); }
+  .win strong { font-style: italic; }
+  .settings { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.8rem; }
+  .settings span { font-size: 0.75rem; padding: 0.15rem 0.55rem; border: 1px solid var(--line); color: var(--ink-soft); }
+
+  /* ===== ジョブ ===== */
+  .jobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 0.9rem; }
+  .job { --c: #fff; position: relative; background: var(--bg-raised); border: 1px solid var(--line); overflow: hidden; display: flex; flex-direction: column; }
+  .job::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--c); }
+  .job .pic { height: 13rem; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 60%, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%), var(--bg-sunk); border-bottom: 1px solid var(--line); }
+  .job .pic img { max-height: 11rem; width: auto; display: block; }
+  .job .body { padding: 0.9rem 1.1rem 1.1rem; display: grid; gap: 0.5rem; }
+  .job h3 { margin: 0; font-size: 1.2rem; font-weight: 800; font-style: italic; color: var(--c); display: flex; align-items: baseline; gap: 0.6rem; }
+  .job h3 .en { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.16em; color: var(--ink-soft); font-style: normal; font-weight: 400; }
+  .job .role { margin: 0; font-size: 0.85rem; color: var(--ink-soft); line-height: 1.7; }
+  .job dl { margin: 0; display: grid; grid-template-columns: 3.2rem 1fr; gap: 0.25rem 0.6rem; font-size: 0.84rem; }
+  .job dt { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; color: var(--ink-soft); padding-top: 0.15rem; }
+  .job dd { margin: 0; }
+  .job dd.ult { font-weight: 700; color: var(--c); }
+
+  /* ===== マップ・スクショ(画像が まだ ないときは 枠だけ)===== */
+  .maps { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: 0.9rem; }
+  .map { margin: 0; background: var(--bg-raised); border: 1px solid var(--line); overflow: hidden; }
+  .shot { position: relative; aspect-ratio: 16 / 9; background: var(--bg-sunk); }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot .ph { display: none; }
+  .missing .shot img { display: none; }
+  .missing .shot .ph { position: absolute; inset: 0.6rem; display: grid; place-items: center; border: 1px dashed var(--line-strong); font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-soft); letter-spacing: 0.1em; text-align: center; }
+  .map figcaption { padding: 0.8rem 1rem 1rem; }
+  .map h3 { margin: 0 0 0.15rem; font-size: 1.05rem; font-weight: 800; font-style: italic; letter-spacing: 0.03em; }
+  .map p { margin: 0; font-size: 0.84rem; color: var(--ink-soft); line-height: 1.7; }
+  .map .random { display: grid; place-items: center; aspect-ratio: 16 / 9; background: repeating-linear-gradient(-60deg, transparent 0 18px, rgba(255,255,255,0.04) 18px 19px), var(--bg-sunk); font-family: var(--font-mono); font-size: 2.6rem; font-style: italic; font-weight: 700; color: var(--ink-soft); }
+
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: 0.9rem; }
+  .gallery figure { margin: 0; border: 1px solid var(--line); overflow: hidden; }
+  .gallery figcaption { padding: 0.5rem 0.8rem; font-size: 0.82rem; color: var(--ink-soft); background: var(--bg-raised); }
+
+  /* ===== 遊び方 ===== */
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 2.6rem 1fr; gap: 0.8rem; align-items: start; padding: 0.75rem 1rem; background: var(--bg-raised); border: 1px solid var(--line); font-size: 0.9rem; }
+  .steps li::before { content: counter(s, decimal-leading-zero); font-family: var(--font-mono); font-style: italic; font-weight: 700; color: var(--ink-soft); }
+  .steps strong { display: block; }
+  .steps span { color: var(--ink-soft); font-size: 0.85rem; }
+
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem; }
+  .feature { background: var(--bg-raised); border: 1px solid var(--line); padding: 1rem 1.1rem; }
+  .feature .fk { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; color: var(--ink-soft); }
+  .feature h3 { margin: 0.2rem 0 0.4rem; font-size: 0.98rem; font-style: italic; }
+  .feature p { margin: 0; font-size: 0.86rem; color: var(--ink-soft); }
+
+  .note { background: var(--bg-raised); border: 1px solid var(--line); border-left: 3px solid var(--accent); padding: 0.9rem 1rem; font-size: 0.9rem; }
+  .note ul { margin: 0; padding-left: 1.2rem; }
+
+  .credits { display: grid; gap: 0.5rem; }
+  .credit { background: var(--bg-raised); border: 1px solid var(--line); padding: 0.7rem 0.9rem; font-size: 0.84rem; }
+  .credit .what { font-weight: 600; display: block; margin-bottom: 0.15rem; }
+  .credit .txt { color: var(--ink-soft); word-break: break-word; }
+  .credit a { color: var(--ink); }
+
+  .cta { display: flex; justify-content: space-between; align-items: center; gap: 1.25rem; flex-wrap: wrap; background: var(--bg-raised); border: 1px solid var(--line-strong); padding: clamp(1.1rem, 3vw, 1.6rem); position: relative; overflow: hidden; }
+  .cta::after { content: ""; position: absolute; right: 9rem; top: -2rem; bottom: -2rem; width: 2px; background: rgba(255,255,255,0.12); transform: skewX(-24deg); pointer-events: none; }
+  .cta h3 { margin: 0 0 0.3rem; font-size: 1.15rem; font-style: italic; }
+  .cta p { margin: 0; font-size: 0.88rem; color: var(--ink-soft); }
+  .dl { display: inline-block; text-decoration: none; font-weight: 800; font-style: italic; background: var(--accent); color: #000; padding: 0.75rem 1.6rem; transform: skewX(-12deg); }
+  .dl > span { display: inline-block; transform: skewX(12deg); }
+  .dl:hover, .dl:focus-visible { filter: brightness(0.88); outline: none; }
+  .dl-sub { font-size: 0.75rem; color: var(--ink-soft); margin: 0.4rem 0 0; text-align: center; }
+
+  footer { margin: clamp(3rem, 7vw, 4.5rem) 0 2.5rem; padding-top: 1.4rem; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← 作品一覧へ戻る</a>
+
+    <div class="hero">
+      <img src="images/rc-hero.gif" alt="Relic Clash のロゴと、ジョブのシルエット" width="1920" height="1080">
+    </div>
+
+    <div class="hero-text">
+      <div>
+        <p class="eyebrow">MINECRAFT BEDROCK PVP WORLD</p>
+        <h1>RELIC CLASH</h1>
+      </div>
+      <p class="tagline">9つのジョブと5つの戦場。倒して、エリアを取って、だれよりも先に点を集めろ。</p>
+    </div>
+
+    <div class="pills">
+      <span class="pill"><span>Minecraft Bedrock 1.26.50 以降</span></span>
+      <span class="pill"><span>マルチプレイ</span></span>
+      <span class="pill"><span>個人戦(FFA)</span></span>
+      <span class="pill"><span>ジョブ 9種類</span></span>
+      <span class="pill"><span>マップ 5種類</span></span>
+    </div>
+
+    <section>
+      <div class="head"><span class="idx">01</span><span class="slash"></span><h2>概要</h2><span class="en">OVERVIEW</span><span class="rule"></span></div>
+      <p>Relic Clash は、全員が敵の個人戦で点を取り合うワールドです。剣・銃・弓・魔法など、戦い方がまったく違う9つのジョブから1つを選んで戦います。</p>
+      <p>相手を倒すほか、マップのエリアに1人だけでいると点が入ります。ジョブごとの必殺技「ULT」や、試合中にたまるお金で買える強化で、戦い方を育てていけます。</p>
+      <p class="soft">試合の前にはロビーの「お試し場」で、全部のジョブを好きなだけ試せます。</p>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">02</span><span class="slash"></span><h2>ルール</h2><span class="en">RULES</span><span class="rule"></span></div>
+      <div class="rules">
+        <div class="rule-card"><span class="pt">+1</span><span class="what">相手を倒す</span><span class="how">どこで倒しても入る</span></div>
+        <div class="rule-card"><span class="pt">+3</span><span class="what">エリアの中の相手を倒す</span><span class="how">エリアを取ろうとしている相手は狙い目</span></div>
+        <div class="rule-card"><span class="pt">+1</span><span class="what">エリアを取る</span><span class="how">エリアに1人だけでいると、5秒ごとに1点</span></div>
+        <div class="rule-card"><span class="pt minus">−3</span><span class="what">自滅する</span><span class="how">落下など、ほかの人に倒されずに死ぬと減る</span></div>
+      </div>
+      <div class="win">
+        <strong>100点</strong>を先に取った人の勝ち。<strong>8分</strong>たったら、そのとき一番点が多い人の勝ちです。
+      </div>
+      <p class="soft small" style="margin-top:0.9rem">数字はすべてホストがゲーム設定で変えられます。</p>
+      <div class="settings">
+        <span>勝利ポイント</span><span>制限時間</span><span>キルの点</span><span>エリア内キルの点</span><span>エリアを1点取る時間</span><span>自滅の減点</span><span>最初のお金</span><span>お金の獲得率</span><span>ULTのたまる速さ</span><span>復活の待ち時間</span><span>マップ</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">03</span><span class="slash"></span><h2>ジョブ</h2><span class="en">JOBS</span><span class="rule"></span></div>
+      <p class="soft">ジョブは復活するたびに選び直せます。くわしい操作は、ゲームの中のジョブ説明で見られます。</p>
+      <div class="jobs">
+        <article class="job" style="--c:#ff5555">
+          <div class="pic"><img src="images/rc-job-swordsman.png" alt="剣士のシルエット" loading="lazy"></div>
+          <div class="body">
+            <h3>剣士<span class="en">SWORDSMAN</span></h3>
+            <p class="role">剣で戦う近距離のジョブ。体力の回復が早く、前に出て戦うのが得意。</p>
+            <dl><dt>武器</dt><dd>剣士の剣(3連斬り・ジャンプ斬り)</dd><dt>スキル</dt><dd>スパイア(構えて突進する突き)</dd><dt>ULT</dt><dd class="ult">エクスカリバー</dd></dl>
+          </div>
+        </article>
+        <article class="job" style="--c:#55ff55">
+          <div class="pic"><img src="images/rc-job-ranger.png" alt="レンジャーのシルエット" loading="lazy"></div>
+          <div class="body">
+            <h3>レンジャー<span class="en">RANGER</span></h3>
+            <p class="role">M16で戦う銃のジョブ。走り続けると足が速くなる。</p>
+            <dl><dt>武器</dt><dd>M16(30発・連射)</dd><dt>特性</dt><dd>2秒走ると足が60％速くなる</dd><dt>ULT</dt><dd class="ult">L96A1</dd></dl>
+          </div>
+        </article>
+        <article class="job" style="--c:#ffaa00">
+          <div class="pic"><img src="images/rc-job-archer.png" alt="弓兵のシルエット" loading="lazy"></div>
+          <div class="body">
+            <h3>弓兵<span class="en">ARCHER</span></h3>
+            <p class="role">弓で戦う遠距離のジョブ。空中から狙うのが得意。</p>
+            <dl><dt>武器</dt><dd>弓兵の弓(引いている間はゆっくり落ちる)</dd><dt>スキル</dt><dd>アップドラフト(上へ大きく飛ぶ)</dd><dt>ULT</dt><dd class="ult">カラドボルグ</dd></dl>
+          </div>
+        </article>
+        <article class="job" style="--c:#9a9a9a">
+          <div class="pic"><img src="images/rc-job-assassin.png" alt="アサシンのシルエット" loading="lazy"></div>
+          <div class="body">
+            <h3>アサシン<span class="en">ASSASSIN</span></h3>
+            <p class="role">投げナイフで戦うジョブ。近くでは斬り、離れた敵にはナイフを投げる。足が速い。</p>
+            <dl><dt>武器</dt><dd>投げナイフ(斬る・3本投げる)</dd><dt>スキル</dt><dd>バックステップ・グラップリングフック(どちらも透明になる)</dd><dt>ULT</dt><dd class="ult">妄想心音(ザバーニーヤ)</dd></dl>
+          </div>
+        </article>
+        <article class="job" style="--c:#5555ff">
+          <div class="pic"><img src="images/rc-job-bomber.png" alt="ボマーのシルエット" loading="lazy"></div>
+          <div class="body">
+            <h3>ボマー<span class="en">BOMBER</span></h3>
+            <p class="role">くっつくボムで戦うジョブ。たくさんくっつけて、まとめて爆発させる。</p>
+            <dl><dt>武器</dt><dd>ボム(投げてくっつけ、まとめて起爆)</dd><dt>スキル</dt><dd>ホッピーボム(すぐ爆発。移動にも使える)</dd><dt>ULT</dt><dd class="ult">クラスターボム</dd></dl>
+          </div>
+        </article>
+        <article class="job" style="--c:#55ffff">
+          <div class="pic"><img src="images/rc-job-airraider.png" alt="エアレイダーのシルエット" loading="lazy"></div>
+          <div class="body">
+            <h3>エアレイダー<span class="en">AIR RAIDER</span></h3>
+            <p class="role">空から攻撃を呼ぶジョブ。ふだんの攻撃は弱いが、呼び出す攻撃が強力。</p>
+            <dl><dt>武器</dt><dd>フレアガン(当てた敵の位置がバレる)</dd><dt>スキル</dt><dd>迫撃砲・機銃掃射(ダメージでたまる功績値で使う)</dd><dt>ULT</dt><dd class="ult">重爆撃</dd></dl>
+          </div>
+        </article>
+        <article class="job" style="--c:#d42a2a">
+          <div class="pic"><img src="images/rc-job-ghoul.png" alt="グールのシルエット" loading="lazy"></div>
+          <div class="body">
+            <h3>グール<span class="en">GHOUL</span></h3>
+            <p class="role">赫子(かぐね)で戦う近距離のジョブ。ふだんは素手だが、受けるダメージが少ない。</p>
+            <dl><dt>武器</dt><dd>素手 → 赫子(殴ってためたゲージで展開)</dd><dt>スキル</dt><dd>赫子で見ている方向へ飛んでいく</dd><dt>ULT</dt><dd class="ult">鉤爪</dd></dl>
+          </div>
+        </article>
+        <article class="job" style="--c:#ff55ff">
+          <div class="pic"><img src="images/rc-job-mage.png" alt="魔法使いのシルエット" loading="lazy"></div>
+          <div class="body">
+            <h3>魔法使い<span class="en">MAGE</span></h3>
+            <p class="role">MPを使って魔法で戦うジョブ。攻撃・吹き飛ばし・守りの魔法を使い分ける。</p>
+            <dl><dt>武器</dt><dd>魔法の杖(魔弾を3発)</dd><dt>スキル</dt><dd>氷霜撃・破衝旋風・土砦</dd><dt>ULT</dt><dd class="ult">雷光</dd></dl>
+          </div>
+        </article>
+        <article class="job" style="--c:#ffffff">
+          <div class="pic"><img src="images/rc-job-samurai.png" alt="武士のシルエット" loading="lazy"></div>
+          <div class="body">
+            <h3>武士<span class="en">SAMURAI</span></h3>
+            <p class="role">刀で戦う近距離のジョブ。攻撃を当て続けて桜気をため、特殊攻撃で戦う。</p>
+            <dl><dt>武器</dt><dd>無明「桜花」(3段斬り)</dd><dt>スキル</dt><dd>踏み込み斬り・カウンター・解華</dd><dt>ULT</dt><dd class="ult">無明三段突き</dd></dl>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">04</span><span class="slash"></span><h2>マップ</h2><span class="en">MAPS</span><span class="rule"></span></div>
+      <p class="soft">マップはホストが試合の前に選びます。スタート地点はどこから始めても有利・不利が出ないように作ってあります。</p>
+      <div class="maps">
+        <figure class="map">
+          <div class="shot"><img src="images/rc-map-ruin.jpg" alt="Ruin" loading="lazy" onerror="this.closest('figure').classList.add('missing')"><span class="ph">SCREENSHOT<br>rc-map-ruin.jpg</span></div>
+          <figcaption><h3>Ruin</h3><p>空に浮かぶ、古代の闘技場の跡。</p></figcaption>
+        </figure>
+        <figure class="map">
+          <div class="shot"><img src="images/rc-map-shrine.jpg" alt="Shrine" loading="lazy" onerror="this.closest('figure').classList.add('missing')"><span class="ph">SCREENSHOT<br>rc-map-shrine.jpg</span></div>
+          <figcaption><h3>Shrine</h3><p>月明かりの夜、竹林に囲まれた神社。</p></figcaption>
+        </figure>
+        <figure class="map">
+          <div class="shot"><img src="images/rc-map-skyport.jpg" alt="Skyport" loading="lazy" onerror="this.closest('figure').classList.add('missing')"><span class="ph">SCREENSHOT<br>rc-map-skyport.jpg</span></div>
+          <figcaption><h3>Skyport</h3><p>夕焼けの雲の上、空の船着き場。エリアは60秒ごとに次の甲板へ移る。</p></figcaption>
+        </figure>
+        <figure class="map">
+          <div class="shot"><img src="images/rc-map-frost.jpg" alt="Frost" loading="lazy" onerror="this.closest('figure').classList.add('missing')"><span class="ph">SCREENSHOT<br>rc-map-frost.jpg</span></div>
+          <figcaption><h3>Frost</h3><p>吹雪にのまれた、雪の廃村。遠くはほとんど見えない。</p></figcaption>
+        </figure>
+        <figure class="map">
+          <div class="shot"><img src="images/rc-map-passchendaele.jpg" alt="Passchendaele" loading="lazy" onerror="this.closest('figure').classList.add('missing')"><span class="ph">SCREENSHOT<br>rc-map-passchendaele.jpg</span></div>
+          <figcaption><h3>Passchendaele</h3><p>第一次世界大戦の戦場がモチーフ。泥の高地と、枝分かれする塹壕。</p></figcaption>
+        </figure>
+        <figure class="map">
+          <div class="random" aria-hidden="true">? ? ?</div>
+          <figcaption><h3>ランダム</h3><p>試合が始まるたびに、5つのマップから1つが選ばれる。</p></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">05</span><span class="slash"></span><h2>遊び方</h2><span class="en">HOW TO PLAY</span><span class="rule"></span></div>
+      <ol class="steps">
+        <li><div><strong>ワールドに入る</strong><span>はじめはロビーに出ます。ロビーには前回の試合の順位と、今の参加者が表示されています。</span></div></li>
+        <li><div><strong>お試し場でジョブを試す</strong><span>台座に乗ると、そのジョブで自由に試せます。強化もお金を気にせず買えます。</span></div></li>
+        <li><div><strong>ホストが設定して始める</strong><span>ロードストーンを使うとゲーム設定が開けます(ホストのみ)。マップや点数を決めて試合を始めます。</span></div></li>
+        <li><div><strong>ジョブを選んで出撃</strong><span>復活するたびにメニューが開き、ジョブの変更と強化の買い物ができます。</span></div></li>
+        <li><div><strong>点を集める</strong><span>勝ちが決まると全員ロビーに戻ります。</span></div></li>
+      </ol>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">06</span><span class="slash"></span><h2>強化とULT</h2><span class="en">SHOP &amp; ULT</span><span class="rule"></span></div>
+      <div class="features">
+        <div class="feature"><span class="fk">ULT</span><h3>ジョブごとの必殺技</h3><p>時間や、相手にダメージを与えることでゲージがたまります。たまり方はジョブによって違います。</p></div>
+        <div class="feature"><span class="fk">COMMON</span><h3>コモンショップ</h3><p>全ジョブ共通の強化。ダメージ軽減、回復、移動速度、ULT短縮など。同じものを買うと段階が上がります。</p></div>
+        <div class="feature"><span class="fk">PASSIVE</span><h3>パッシブショップ</h3><p>ジョブの能力を上げる強化。ランダムに出る3つから選びます。</p></div>
+        <div class="feature"><span class="fk">SKILL</span><h3>スキルショップ</h3><p>ジョブのスキルそのものを変える強化。こちらもランダムな3つから選びます。</p></div>
+        <div class="feature"><span class="fk">MONEY</span><h3>お金</h3><p>相手を倒す、倒すのを手伝う、エリアにいることでもらえます。</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">07</span><span class="slash"></span><h2>スクリーンショット</h2><span class="en">SCREENSHOTS</span><span class="rule"></span></div>
+      <div class="gallery">
+        <figure><div class="shot"><img src="images/rc-shot-lobby.jpg" alt="ロビー" loading="lazy" onerror="this.closest('figure').classList.add('missing')"><span class="ph">SCREENSHOT<br>rc-shot-lobby.jpg</span></div><figcaption>ロビー</figcaption></figure>
+        <figure><div class="shot"><img src="images/rc-shot-battle.jpg" alt="試合中" loading="lazy" onerror="this.closest('figure').classList.add('missing')"><span class="ph">SCREENSHOT<br>rc-shot-battle.jpg</span></div><figcaption>試合中</figcaption></figure>
+        <figure><div class="shot"><img src="images/rc-shot-shop.jpg" alt="復活のメニュー" loading="lazy" onerror="this.closest('figure').classList.add('missing')"><span class="ph">SCREENSHOT<br>rc-shot-shop.jpg</span></div><figcaption>復活のメニュー(ショップ)</figcaption></figure>
+        <figure><div class="shot"><img src="images/rc-shot-ult.jpg" alt="ULT" loading="lazy" onerror="this.closest('figure').classList.add('missing')"><span class="ph">SCREENSHOT<br>rc-shot-ult.jpg</span></div><figcaption>ULT</figcaption></figure>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">08</span><span class="slash"></span><h2>注意</h2><span class="en">NOTES</span><span class="rule"></span></div>
+      <div class="note">
+        <ul>
+          <li>ワールド(.mcworld)での配布です。必要なパックはワールドの中に入っています。</li>
+          <li>ほかのアドオンをいっしょに入れると、正しく動かないことがあります。</li>
+          <li>1人でもお試し場は使えますが、試合は複数人で遊ぶことを想定しています。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <div class="head"><span class="idx">09</span><span class="slash"></span><h2>使用素材のクレジット</h2><span class="en">CREDITS</span><span class="rule"></span></div>
+      <p class="soft">以下の作品を元に、Minecraft Bedrock向けに変換・加工(改変)して使っています。制作者の皆さんに感謝します。同じ内容を、パックの中の CREDITS.txt にも入れています。</p>
+      <div class="credits">
+        <div class="credit"><span class="what">剣士の剣</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/medieval-sword-da574cba504e4b83a3293f3d3bd067fb">medieval sword</a>" by <a href="https://sketchfab.com/lowseb">LowSeb</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="what">M16</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/m16a1-low-poly-bcf421747bea4afd942381cefa498a02">M16A1 Low Poly</a>" by <a href="https://sketchfab.com/aBraM_">aBraM_</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="what">L96A1</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/l96a1-d8ca7419de044c8e88847c90eda3f151">L96A1</a>" by <a href="https://sketchfab.com/arc4de">arc4de</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="what">投げナイフ</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/throwing-knife-17a31b12e21945418b0e50ab209e5db8">throwing_knife</a>" by <a href="https://sketchfab.com/strmcat">strmcat</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="what">フレアガン</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/low-poly-flare-gun-ccf38c8f0cb74a8cbd237ab4a0ba1467">Low Poly Flare Gun</a>" by <a href="https://sketchfab.com/Naudaff3D">Naudaff3D</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="what">赫子</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/rinkaku-kagune-cbdae4fb99604c1490b5e03af32e11ef">Rinkaku Kagune</a>" by <a href="https://sketchfab.com/Sleepingcattoo">Sleepingcattoo</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="what">魔法の杖</span><span class="txt">This work is based on "<a href="https://sketchfab.com/3d-models/roxy-migurdias-staff-7f44931f68104f91a23f3cc6bc75a4de">Roxy Migurdia's Staff</a>" by <a href="https://sketchfab.com/JosevanD2">Josevan Danusastra</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="what">ナイフの効果音</span><span class="txt">"<a href="https://makotohiramatsu.itch.io/knife-free">Knife Sound Effect(Free)</a>" by MakotoHiramatsu, licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a></span></div>
+        <div class="credit"><span class="what">心音の効果音</span><span class="txt">"<a href="https://budgetpixel.com/sfx/anxious-fast-heartbeat-d4d7fe5f">Anxious Fast Heartbeat</a>" by BudgetPixel AI — <a href="http://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>(速さを変えて使用)</span></div>
+        <div class="credit"><span class="what">魔法の効果音</span><span class="txt">"<a href="https://lentikula.itch.io/freecc0-basic-spell-impacts-sfx">Basic Spell Impacts</a>"・"<a href="https://lentikula.itch.io/druid-spell-impacts">Druid Spell Impacts</a>" by lentikula — CC0</span></div>
+        <div class="credit"><span class="what">グラップリングフックの効果音</span><span class="txt">Generated with ElevenLabs Sound Effects</span></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="cta">
+        <div>
+          <h3>ダウンロード</h3>
+          <p>v1.0.0 — .mcworld ファイルです。開くとMinecraftにワールドとして読み込まれます。</p>
+        </div>
+        <div>
+          <a class="dl" href="https://github.com/lzcat26-dev/lzcat26-dev.github.io/releases/download/relic-v1.0.0/relic_clash.v1.0.0.mcworld"><span>ダウンロード →</span></a>
+          <p class="dl-sub">v1.0.0(約19MB)</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>Relic Clash — Minecraft Bedrock PvP World</span>
+      <span><a href="index.html">LZCのアドオン倉庫</a></span>
+    </footer>
+  </div>
+</body>
+</html>
