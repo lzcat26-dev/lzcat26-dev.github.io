@@ -188,7 +188,7 @@
       <table class="numbers">
         <thead><tr><th>category</th><th>効く音量の設定</th><th>バニラでの使われ方</th></tr></thead>
         <tbody>
-          <tr><td class="num">music</td><td>音楽</td><td>BGM(<code>music.game</code> など)</td></tr>
+          <tr><td class="num">music</td><td>音楽(<code>/playsound</code> で鳴らしたときは効かない)</td><td>BGM(<code>music.game</code> など)</td></tr>
           <tr><td class="num">record</td><td>ジュークボックス・音符ブロック</td><td>レコード、ヤギの角笛</td></tr>
           <tr><td class="num">player</td><td>プレイヤー</td><td>プレイヤーの動き、効果がかかったときの音</td></tr>
           <tr><td class="num">block</td><td>ブロック</td><td>ブロックを置く・こわす、ビーコンなど</td></tr>
@@ -201,7 +201,9 @@
         </tbody>
       </table>
       <p>設定の名前は、だいたいの対応です。書かれていない・知らない名前の category は「サウンド」の音量で変わります。</p>
-      <p><strong>選び方で気をつけたいのは、聞こえなくなる人が出ること</strong>です。たとえば効果音を <code>music</code> にすると、音楽の音量を0にして遊んでいる人には、その効果音も聞こえません。逆に、BGM を流しながら遊んでほしい演出の音を <code>music</code> にしておくと、音楽の音量と一緒に大きさを変えてもらえます。</p>
+      <p><strong><code>music</code> のいちばんの特ちょうは、左右の差がなくなること</strong>です。どこで鳴らしても、右から・左からという聞こえ方にならず、耳もとで流れているように聞こえます。曲や、画面全体の演出の音に向いています。逆に、場所から鳴っているように聞かせたい効果音を <code>music</code> にすると、どこで鳴っているのかわからなくなります。</p>
+      <p><strong>気をつけたいのは、<code>/playsound</code> で鳴らすと <code>music</code> が効かないこと</strong>です。<code>category</code> を <code>music</code> にしても、音楽の音量を0にしている人にも流れます。<code>/playsound</code> で鳴らした音は、<code>music</code> にしても効果音として扱われる、ということです。スクリプトの <code>player.playSound()</code> で鳴らしたときも同じです。</p>
+      <p>音楽の音量が効くのは、<code>/music</code> コマンドで流した音だけです。音楽の音量を0にしている人には、<code>/music</code> の音は聞こえません。</p>
       <p>迷ったら、だれが出した音かで選ぶと自然です。プレイヤーの武器や技なら <code>player</code>、置いたブロックや仕掛けなら <code>block</code>、自作の敵なら <code>hostile</code> です。</p>
       <p>参考: <a href="https://github.com/Mojang/bedrock-samples" target="_blank" rel="noopener">bedrock-samples</a>(バニラの <code>sounds/sound_definitions.json</code>)、<a href="https://wiki.bedrock.dev/concepts/sounds" target="_blank" rel="noopener">Bedrock Wiki「Sounds」</a></p>
 
@@ -220,7 +222,13 @@
 <pre><code>player.playSound("lzc.self.explode", { volume: 0.8, pitch: 1.2 });
 player.playSound("lzc.bomb.throw", { location: here });</code></pre>
       <p><code>location</code> をつけると、その場所から鳴っているように聞こえます。ほかの人にも聞かせたいときは、聞かせたい人それぞれに <code>playSound</code> を呼びます。投げた本人には耳もとの音、まわりの人には投げた場所からの音、のように分けることもできます。</p>
-      <p>止めるときは <code>stopsound @s 音の名前</code> を、その人で実行します。</p>
+      <p>私は、本人用とまわり用で定義を2つ作って鳴らし分けています。本人用は <code>category</code> を <code>music</code> にして、左右の差がない音を耳もとで鳴らします。まわり用は <code>player</code> にして、その場所から鳴らします。</p>
+<pre><code>shooter.playSound("lzc.self.fire");
+for (const p of world.getPlayers()) {
+  if (p.id !== shooter.id) p.playSound("lzc.fire", { location: shooter.location });
+}</code></pre>
+      <p><code>lzc.self.fire</code> が <code>music</code>、<code>lzc.fire</code> が <code>player</code> の定義です。撃った本人は銃の音が頭の真ん中で鳴り、まわりの人には撃った方向から聞こえます。</p>
+      <p>止めるときは <code>stopsound @s 音の名前</code> を、その人で実行します。ただし、<code>/music</code> で流した音は <code>stopsound</code> では止まりません。<code>music stop</code> を使います。</p>
 
       <h2>長い音には stream</h2>
 <pre><code>"lzc.excalibur": {
