@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手持ちアイテムのアニメーションを再生する方法 | LZCのアドオン倉庫</title>
+<meta name="description" content="Minecraft Bedrockで、手に持ったアイテム(attachable)の一回だけのアニメーションを動かす方法。playAnimation が使えない理由と、q.is_using_item とアニメーションコントローラーでの切り替え。">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1868783573127394" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --paper: #f1efe8;
+    --paper-raised: #ffffff;
+    --ink: #211f1a;
+    --ink-soft: #6b6759;
+    --line: #ddd8ca;
+    --accent: #3d5a63;
+    --accent-soft: #d8e2e1;
+    --code-bg: #e7e3d8;
+
+    --font-body: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #17181a;
+      --paper-raised: #1f2124;
+      --ink: #ece9e1;
+      --ink-soft: #9a9689;
+      --line: #34332f;
+      --accent: #7fa6ac;
+      --accent-soft: #253235;
+      --code-bg: #26282b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .wrap { max-width: 76rem; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3rem); }
+
+  .site-header { padding: 2rem 0 1.5rem; border-bottom: 1px solid var(--line); }
+  .site-header .row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+  }
+  .wordmark {
+    font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 0.55rem; text-decoration: none;
+  }
+  .wordmark .dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--accent); flex: none; }
+  .site-nav { display: flex; gap: 1.6rem; font-size: 0.86rem; color: var(--ink-soft); }
+  .site-nav a { text-decoration: none; }
+  .site-nav a:hover { color: var(--ink); }
+
+  .article { max-width: 42rem; padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(2.5rem, 6vw, 4rem); }
+  .article-head { display: grid; gap: 0.9rem; margin-bottom: 2.2rem; }
+  .article-head h1 { font-size: clamp(1.45rem, 3.2vw, 2rem); line-height: 1.4; margin: 0; font-weight: 700; text-wrap: balance; }
+  .article-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tag {
+    font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft);
+  }
+
+  .article h2 {
+    font-size: 1.1rem; margin: 2.6rem 0 0.9rem; padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--line); font-weight: 700;
+  }
+  .article p, .article li { line-height: 1.95; font-size: 0.96rem; }
+  .article p { margin: 0 0 1rem; }
+  .article ul { margin: 0 0 1rem; padding-left: 1.3rem; }
+  .article li { margin: 0.15rem 0; }
+  .article strong { font-weight: 700; }
+  .article code {
+    font-family: var(--font-mono); font-size: 0.85em;
+    background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 0.2rem;
+  }
+  .article pre {
+    background: var(--code-bg); padding: 0.9rem 1.1rem; border-radius: 0.3rem;
+    overflow-x: auto; margin: 0 0 1rem;
+  }
+  .article pre code { background: none; padding: 0; font-size: 0.86rem; }
+
+  .summary {
+    background: var(--paper-raised); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 0.3rem; padding: 1rem 1.2rem; margin: 0 0 1rem;
+  }
+  .summary ul { margin: 0; }
+
+  .numbers { width: 100%; border-collapse: collapse; margin: 0 0 1rem; font-size: 0.92rem; }
+  .numbers th, .numbers td { border-bottom: 1px solid var(--line); padding: 0.55rem 0.4rem; text-align: left; }
+  .numbers th { color: var(--ink-soft); font-weight: 400; font-size: 0.8rem; }
+  .numbers td.num { font-family: var(--font-mono); }
+
+  .shot { margin: 1.2rem 0 1.4rem; }
+  .shot .frame {
+    width: 100%; aspect-ratio: 16 / 9; border: 1px dashed var(--line); border-radius: 0.3rem;
+    display: grid; place-items: center; overflow: hidden; background: var(--paper-raised);
+    color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.75rem;
+  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot figcaption { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.45rem; }
+
+  .dl { display: inline-block; margin: 0.4rem 0 0.6rem; padding: 0.7rem 1.2rem; border-radius: 0.3rem; background: var(--accent); color: var(--paper); text-decoration: none; font-weight: 700; font-size: 0.92rem; }
+  .dl:hover { opacity: 0.88; }
+  .back { display: block; width: fit-content; margin-top: 2.5rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); text-decoration: none; }
+
+  .site-footer {
+    border-top: 1px solid var(--line); padding: 1.6rem 0 2.5rem;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    font-size: 0.78rem; color: var(--ink-soft);
+  }
+  .site-footer a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <div class="row">
+        <a class="wordmark" href="index.html"><span class="dot"></span><span style="font-weight:700;">LZC</span><span style="font-family:var(--font-body);font-weight:400;margin-left:0.4em;letter-spacing:0;">のアドオン倉庫</span></a>
+        <nav class="site-nav">
+          <a href="index.html#catalog">作品一覧</a>
+          <a href="index.html#columns">コラム</a>
+          <a href="about.html">このサイトについて</a>
+        </nav>
+      </div>
+    </header>
+
+    <article class="article">
+      <div class="article-head">
+        <p class="eyebrow" style="margin:0;">Column</p>
+        <h1>手持ちアイテムのアニメーションを再生する方法</h1>
+        <div class="article-tags">
+          <span class="tag">アニメーション</span>
+          <span class="tag">attachable</span>
+        </div>
+      </div>
+
+      <p>銃を撃ったときの反動のように、手に持ったアイテム(attachable)で一回だけのアニメーションを動かすやり方です。</p>
+      <p>スクリプトの <code>playAnimation()</code> で動かそうとして、うまくいかなかった人も多いと思います。</p>
+
+      <h2>結論</h2>
+      <div class="summary">
+        <ul>
+          <li>一人称の手持ちアイテムのアニメは、<strong><code>playAnimation()</code> では動かない</strong></li>
+          <li>attachable の中のアニメーションコントローラーで、<strong><code>q.is_using_item</code></strong> などの Molang を合図にして切り替える</li>
+          <li>アイテムには <strong><code>minecraft:use_modifiers</code></strong> をつける。ないと <code>q.is_using_item</code> が true にならない</li>
+          <li>スクリプトの合図で動かしたいなら、武器を<strong>プレイヤーのモデル</strong>に入れて、プレイヤーのプロパティで切り替える</li>
+        </ul>
+      </div>
+
+      <h2>playAnimation() は使えない</h2>
+      <p>コントローラーの書き方や <code>stopExpression</code> をいろいろ変えて試しましたが、一人称の手持ちアイテムのアニメは、<code>playAnimation()</code> では何も起きませんでした。エラーも出ません。</p>
+      <p>スクリプトから動かすのはあきらめて、リソースパックの側だけで切り替えます。</p>
+
+      <h2>1. アイテムに use_modifiers をつける</h2>
+<pre><code>"minecraft:use_modifiers": {
+  "movement_modifier": 1,
+  "use_duration": 3
+}</code></pre>
+      <p>これがないと、右クリックしても「使っている」状態にならず、<code>q.is_using_item</code> がずっと false のままです。<code>movement_modifier</code> を 1 にしておけば、使っている間も足は遅くなりません。</p>
+
+      <h2>2. アニメーションコントローラーを作る</h2>
+<pre><code>"controller.animation.lzc_gun.shot": {
+  "initial_state": "default",
+  "states": {
+    "default": {
+      "transitions": [ { "shot": "q.is_using_item" } ]
+    },
+    "shot": {
+      "animations": [ "shot" ],
+      "transitions": [ { "default": "q.all_animations_finished" } ]
+    }
+  }
+}</code></pre>
+      <p>右クリックで <code>shot</code> に移って一回再生し、終わったら <code>default</code> に戻ります。</p>
+      <p><code>default</code> のように何も再生しない状態では、<code>"animations": []</code> と空で書くと読み込みのときにエラーになります。<code>animations</code> ごと書かないようにします。</p>
+
+      <h2>3. attachable に登録する</h2>
+<pre><code>"animations": {
+  "first_person_hold": "animation.lzc_gun.first_person_hold",
+  "third_person_hold": "animation.lzc_gun.third_person_hold",
+  "shot": "animation.lzc_gun.shot",
+  "first_person_shot": "controller.animation.lzc_gun.shot"
+},
+"scripts": {
+  "animate": [
+    { "first_person_hold": "c.is_first_person" },
+    { "third_person_hold": "!c.is_first_person" },
+    { "first_person_shot": "c.is_first_person" }
+  ]
+}</code></pre>
+      <p>構え(hold)のアニメはずっと動かしたまま、その上にコントローラーを重ねます。</p>
+
+      <h2>同じボーンを2つのアニメで動かさない</h2>
+      <p>ここがいちばんハマりました。構えのアニメと撃つアニメの両方で同じボーン(たとえば銃全体の <code>root_item</code>)を動かすと、2つの値が<strong>足し算</strong>されます。上書きではありません。銃が変な角度に飛んでいったり、大きくなったりします。</p>
+      <p>なので、撃つアニメでは、構えのアニメが動かしているボーンには一切さわりません。スライドや撃鉄のように撃つときだけ動く部品だけを、<code>[0, 0, 0]</code> から動いて <code>[0, 0, 0]</code> に戻る形で書きます。</p>
+
+      <h2>スクリプトから合図を送りたいとき: プレイヤーのアニメにする</h2>
+      <p>「この技を出したら振る」「弾が0になったらリロード」のように、スクリプトだけが知っている合図は、<code>q.is_using_item</code> のような Molang では調べられません。</p>
+      <p>そういうときは、武器を attachable ではなく<strong>プレイヤーのモデルの中</strong>に入れて、プレイヤーのアニメとして動かします。<a href="relicclash.html">Relic Clash</a> の剣は、全部このやり方です。</p>
+      <ul>
+        <li>剣のモデルは、プレイヤーのジオメトリに入れておく。手に持っているアイテムを <code>query.get_equipped_item_name(0)</code> で調べて、持っているときだけ見せる</li>
+        <li>プレイヤーに <code>client_sync: true</code> の数字のプロパティを作る</li>
+        <li>スクリプトは振るときにそのプロパティを変える。プレイヤーのアニメーションコントローラーが <code>q.property()</code> を見て切り替わる</li>
+      </ul>
+<pre><code>"relic:sw_swing": {
+  "type": "int",
+  "range": [ 0, 4 ],
+  "default": 0,
+  "client_sync": true
+}</code></pre>
+<pre><code>"holding": {
+  "animations": [ "sword_holding" ],
+  "transitions": [ {
+    "swing1": "q.property('relic:sw_swing') != v.sw_seen &amp;&amp; q.property('relic:sw_swing') &gt; 0"
+  } ]
+},
+"swing1": {
+  "on_entry": [ "v.sw_seen = q.property('relic:sw_swing');" ],
+  "animations": [ "sword_swing1" ],
+  "transitions": [ { "holding": "q.all_animations_finished" } ]
+}</code></pre>
+      <p>ポイントは、<strong>振るたびに値を 1 と 2 で交互にする</strong>ことです。同じ値を入れ直しても「変わった」ことにならないので、続けて振ったときに2回目が出ません。コントローラーの側は、最後に見た値を <code>v.sw_seen</code> に取っておいて、それとちがう値が来たら振ります。<code>v.sw_seen</code> には、<code>initialize</code> で先に 0 を入れておきます(理由は下の「気をつけること」)。</p>
+<pre><code>const parity = new Map();
+
+function signalSwing(player) {
+  const next = (parity.get(player.id) ?? 0) ^ 1;
+  parity.set(player.id, next);
+  player.setProperty("relic:sw_swing", 1 + next);
+}</code></pre>
+      <p>プレイヤーのアニメなので、一人称と三人称で別々のアニメを用意できます。手持ちアイテムの構えのアニメと同じく、同じボーンを2つのアニメで動かすと足し算になるのは変わりません。</p>
+      <p>attachable のまま済ませたいなら、リロード中だけ別のアイテム(マガジン)に持ち替えて、そのアイテムの構えのアニメとして動きを出す、というやり方もあります。</p>
+
+      <h2>気をつけること</h2>
+      <p><strong>スクリプトでクリックを無視しても、アニメは止まりません。</strong>アニメは <code>q.is_using_item</code> を見て勝手に動くので、スクリプトの側で「今は撃たない」と決めても、動きだけは出てしまいます。</p>
+      <p>クリックそのものを止めたいときは、アイテムに <code>minecraft:cooldown</code> をつけて、スクリプトから <code>player.startItemCooldown()</code> を呼びます。こうすると使うこと自体ができなくなるので、アニメも出ません。</p>
+      <p><strong>pre_animation で、まだ値の入っていない変数を読まない。</strong><code>v.x = 条件 ? q.life_time : v.x;</code> のように自分を読む変数は、<code>initialize</code> で先に値を入れておきます。入れていないとエラーになり、<strong>そこから下の pre_animation が全部動かなくなります</strong>。私はこれで、銃が全部見えなくなりました。</p>
+
+      <a class="back" href="index.html#columns">← コラム一覧へ</a>
+    </article>
+
+    <footer class="site-footer">
+      <span>ダウンロードはこのサイト上で行えます。<a href="about.html">このサイトについて</a> / <a href="privacy.html">プライバシーポリシー</a></span>
+      <span>© LZCのアドオン倉庫</span>
+    </footer>
+  </div>
+</body>
+</html>

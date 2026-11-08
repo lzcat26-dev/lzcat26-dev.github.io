@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBR でブロックを光らせる・つやを出す | LZCのアドオン倉庫</title>
+<meta name="description" content="Minecraft Bedrockのバイブラントビジュアルズで、自作ブロックの一部だけを光らせたり、つやを出したりする方法。texture_set.json と MER の値、透明度で色が消える落とし穴。">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1868783573127394" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --paper: #f1efe8;
+    --paper-raised: #ffffff;
+    --ink: #211f1a;
+    --ink-soft: #6b6759;
+    --line: #ddd8ca;
+    --accent: #3d5a63;
+    --accent-soft: #d8e2e1;
+    --code-bg: #e7e3d8;
+
+    --font-body: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #17181a;
+      --paper-raised: #1f2124;
+      --ink: #ece9e1;
+      --ink-soft: #9a9689;
+      --line: #34332f;
+      --accent: #7fa6ac;
+      --accent-soft: #253235;
+      --code-bg: #26282b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .wrap { max-width: 76rem; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3rem); }
+
+  .site-header { padding: 2rem 0 1.5rem; border-bottom: 1px solid var(--line); }
+  .site-header .row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+  }
+  .wordmark {
+    font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 0.55rem; text-decoration: none;
+  }
+  .wordmark .dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--accent); flex: none; }
+  .site-nav { display: flex; gap: 1.6rem; font-size: 0.86rem; color: var(--ink-soft); }
+  .site-nav a { text-decoration: none; }
+  .site-nav a:hover { color: var(--ink); }
+
+  .article { max-width: 42rem; padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(2.5rem, 6vw, 4rem); }
+  .article-head { display: grid; gap: 0.9rem; margin-bottom: 2.2rem; }
+  .article-head h1 { font-size: clamp(1.45rem, 3.2vw, 2rem); line-height: 1.4; margin: 0; font-weight: 700; text-wrap: balance; }
+  .article-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tag {
+    font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft);
+  }
+
+  .article h2 {
+    font-size: 1.1rem; margin: 2.6rem 0 0.9rem; padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--line); font-weight: 700;
+  }
+  .article p, .article li { line-height: 1.95; font-size: 0.96rem; }
+  .article p { margin: 0 0 1rem; }
+  .article ul { margin: 0 0 1rem; padding-left: 1.3rem; }
+  .article li { margin: 0.15rem 0; }
+  .article strong { font-weight: 700; }
+  .article code {
+    font-family: var(--font-mono); font-size: 0.85em;
+    background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 0.2rem;
+  }
+  .article pre {
+    background: var(--code-bg); padding: 0.9rem 1.1rem; border-radius: 0.3rem;
+    overflow-x: auto; margin: 0 0 1rem;
+  }
+  .article pre code { background: none; padding: 0; font-size: 0.86rem; }
+
+  .summary {
+    background: var(--paper-raised); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 0.3rem; padding: 1rem 1.2rem; margin: 0 0 1rem;
+  }
+  .summary ul { margin: 0; }
+
+  .numbers { width: 100%; border-collapse: collapse; margin: 0 0 1rem; font-size: 0.92rem; }
+  .numbers th, .numbers td { border-bottom: 1px solid var(--line); padding: 0.55rem 0.4rem; text-align: left; }
+  .numbers th { color: var(--ink-soft); font-weight: 400; font-size: 0.8rem; }
+  .numbers td.num { font-family: var(--font-mono); }
+
+  .shot { margin: 1.2rem 0 1.4rem; }
+  .shot .frame {
+    width: 100%; aspect-ratio: 16 / 9; border: 1px dashed var(--line); border-radius: 0.3rem;
+    display: grid; place-items: center; overflow: hidden; background: var(--paper-raised);
+    color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.75rem;
+  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot figcaption { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.45rem; }
+
+  .dl { display: inline-block; margin: 0.4rem 0 0.6rem; padding: 0.7rem 1.2rem; border-radius: 0.3rem; background: var(--accent); color: var(--paper); text-decoration: none; font-weight: 700; font-size: 0.92rem; }
+  .dl:hover { opacity: 0.88; }
+  .back { display: block; width: fit-content; margin-top: 2.5rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); text-decoration: none; }
+
+  .site-footer {
+    border-top: 1px solid var(--line); padding: 1.6rem 0 2.5rem;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    font-size: 0.78rem; color: var(--ink-soft);
+  }
+  .site-footer a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <div class="row">
+        <a class="wordmark" href="index.html"><span class="dot"></span><span style="font-weight:700;">LZC</span><span style="font-family:var(--font-body);font-weight:400;margin-left:0.4em;letter-spacing:0;">のアドオン倉庫</span></a>
+        <nav class="site-nav">
+          <a href="index.html#catalog">作品一覧</a>
+          <a href="index.html#columns">コラム</a>
+          <a href="about.html">このサイトについて</a>
+        </nav>
+      </div>
+    </header>
+
+    <article class="article">
+      <div class="article-head">
+        <p class="eyebrow" style="margin:0;">Column</p>
+        <h1>PBR でブロックを光らせる・つやを出す</h1>
+        <div class="article-tags">
+          <span class="tag">PBR</span>
+          <span class="tag">リソースパック</span>
+        </div>
+      </div>
+
+      <p>バイブラントビジュアルズで、自作ブロックの一部だけを光らせたり、金属や床にちょっとしたつやを出したりするやり方です。</p>
+      <p>どれも、バイブラントビジュアルズ(またはレイトレーシング)のときだけ見た目が変わります。オフのときは、ふつうのブロックのままです。</p>
+
+      <h2>結論</h2>
+      <div class="summary">
+        <ul>
+          <li>色の絵と同じ場所に <strong><code>〇〇.texture_set.json</code></strong> を置く</li>
+          <li>MER は <strong>R=金属っぽさ・G=光る強さ・B=ざらざら具合</strong>(4つ目の A は subsurface)</li>
+          <li>ブロック全体を同じにするなら<strong>数字3つ</strong>、一部だけ光らせるなら<strong>MER の絵</strong></li>
+          <li>MER の絵は<strong>透明度を全部 255</strong> にして保存する</li>
+        </ul>
+      </div>
+
+      <h2>texture_set.json を置く</h2>
+      <p>色の絵が <code>textures/blocks/lzc_lamp.png</code> なら、同じフォルダに <code>lzc_lamp.texture_set.json</code> を置きます。</p>
+<pre><code>{
+  "format_version": "1.21.30",
+  "minecraft:texture_set": {
+    "color": "lzc_lamp",
+    "metalness_emissive_roughness": "lzc_lamp_mer"
+  }
+}</code></pre>
+      <p>4つ目の値(subsurface)も使うときは、キーを <code>metalness_emissive_roughness_subsurface</code> にして、4チャンネル(RGBA)の絵を指定します。名前の後ろの <code>_subsurface</code> まで書くのを忘れないようにします。</p>
+
+      <h2>MER の3つの値</h2>
+      <table class="numbers">
+        <thead><tr><th>チャンネル</th><th>意味</th><th>0 のとき → 255 のとき</th></tr></thead>
+        <tbody>
+          <tr><td class="num">R</td><td>metalness(金属っぽさ)</td><td>金属でない → 金属</td></tr>
+          <tr><td class="num">G</td><td>emissive(光る強さ)</td><td>光らない → 強く光る</td></tr>
+          <tr><td class="num">B</td><td>roughness(ざらざら具合)</td><td>つるつる → ざらざら</td></tr>
+        </tbody>
+      </table>
+
+      <h2>全体を同じにするなら、数字だけでいい</h2>
+      <p>ブロック全体を同じ質感にしたいだけなら、絵を作らずに数字を書けます。</p>
+<pre><code>"metalness_emissive_roughness": [ 170, 0, 100 ]</code></pre>
+      <p>これは、少し金属っぽく、光らず、ややつやがある、という設定です。私は金属の机をこのくらいにしています。床に「ほんの少しだけ」つやを出したいときは、<code>[ 0, 0, 205 ]</code> のように金属っぽさは0のまま、ざらざら具合を少しだけ下げています。</p>
+
+      <h2>一部だけ光らせるなら、MER の絵を作る</h2>
+      <p>ちょうちんの赤いところだけ、ランプのガラスだけ、のように一部だけ光らせたいときは、色の絵と同じ大きさの MER の絵を作って、光らせたいピクセルだけ G を上げます。</p>
+      <p>光らせたい部分がほかより色あざやかなら、「R・G・B のいちばん大きい値といちばん小さい値の差」が大きいピクセルを選ぶと、色に関係なくまとめて拾えます。私は差が 35 より大きいところを光らせました。こうすると、赤も青も1回で選べます。</p>
+      <p><strong>G は 255 にしないほうがいいことが多いです。</strong>全部 255 だと光りすぎました。私の場合、赤は 80、青は 255 で落ち着きました。色によって、ちょうどいい強さはちがいます。</p>
+
+      <h2>気をつけること: 透明度は全部 255 にする</h2>
+      <p>ここがいちばんわかりにくいところでした。MER の絵を、透明度0のピクセルがある状態で PNG に保存したら、<strong>そのピクセルの R・G・B が全部0になって</strong>いました。透明なピクセルの色は捨ててしまう保存のしかたがあるためです。</p>
+      <p>MER の絵の4つ目のチャンネルは、本当の「透明」ではなく subsurface の値です。3チャンネルで使う場合も4チャンネルで使う場合も、<strong>透明度は全部 255 にして保存</strong>するのが安全です。</p>
+      <p>画像ソフトで作るときも、透明なピクセルの色を残す設定があれば、それをオンにしておきます(GIMP なら PNG を書き出すときの「透明ピクセルの色の値を保存」)。</p>
+
+      <a class="back" href="index.html#columns">← コラム一覧へ</a>
+    </article>
+
+    <footer class="site-footer">
+      <span>ダウンロードはこのサイト上で行えます。<a href="about.html">このサイトについて</a> / <a href="privacy.html">プライバシーポリシー</a></span>
+      <span>© LZCのアドオン倉庫</span>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>壁を透けて見えるエンティティの作り方 | LZCのアドオン倉庫</title>
+<meta name="description" content="Minecraft Bedrockで、壁の向こうのプレイヤーの輪郭を光らせて見せる方法。depthFunc Always とステンシルを使った自作マテリアル、輪郭用モデル、プロパティでの出し入れ。">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1868783573127394" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --paper: #f1efe8;
+    --paper-raised: #ffffff;
+    --ink: #211f1a;
+    --ink-soft: #6b6759;
+    --line: #ddd8ca;
+    --accent: #3d5a63;
+    --accent-soft: #d8e2e1;
+    --code-bg: #e7e3d8;
+
+    --font-body: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #17181a;
+      --paper-raised: #1f2124;
+      --ink: #ece9e1;
+      --ink-soft: #9a9689;
+      --line: #34332f;
+      --accent: #7fa6ac;
+      --accent-soft: #253235;
+      --code-bg: #26282b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .wrap { max-width: 76rem; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3rem); }
+
+  .site-header { padding: 2rem 0 1.5rem; border-bottom: 1px solid var(--line); }
+  .site-header .row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+  }
+  .wordmark {
+    font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 0.55rem; text-decoration: none;
+  }
+  .wordmark .dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--accent); flex: none; }
+  .site-nav { display: flex; gap: 1.6rem; font-size: 0.86rem; color: var(--ink-soft); }
+  .site-nav a { text-decoration: none; }
+  .site-nav a:hover { color: var(--ink); }
+
+  .article { max-width: 42rem; padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(2.5rem, 6vw, 4rem); }
+  .article-head { display: grid; gap: 0.9rem; margin-bottom: 2.2rem; }
+  .article-head h1 { font-size: clamp(1.45rem, 3.2vw, 2rem); line-height: 1.4; margin: 0; font-weight: 700; text-wrap: balance; }
+  .article-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tag {
+    font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft);
+  }
+
+  .article h2 {
+    font-size: 1.1rem; margin: 2.6rem 0 0.9rem; padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--line); font-weight: 700;
+  }
+  .article p, .article li { line-height: 1.95; font-size: 0.96rem; }
+  .article p { margin: 0 0 1rem; }
+  .article ul { margin: 0 0 1rem; padding-left: 1.3rem; }
+  .article li { margin: 0.15rem 0; }
+  .article strong { font-weight: 700; }
+  .article code {
+    font-family: var(--font-mono); font-size: 0.85em;
+    background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 0.2rem;
+  }
+  .article pre {
+    background: var(--code-bg); padding: 0.9rem 1.1rem; border-radius: 0.3rem;
+    overflow-x: auto; margin: 0 0 1rem;
+  }
+  .article pre code { background: none; padding: 0; font-size: 0.86rem; }
+
+  .summary {
+    background: var(--paper-raised); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 0.3rem; padding: 1rem 1.2rem; margin: 0 0 1rem;
+  }
+  .summary ul { margin: 0; }
+
+  .numbers { width: 100%; border-collapse: collapse; margin: 0 0 1rem; font-size: 0.92rem; }
+  .numbers th, .numbers td { border-bottom: 1px solid var(--line); padding: 0.55rem 0.4rem; text-align: left; }
+  .numbers th { color: var(--ink-soft); font-weight: 400; font-size: 0.8rem; }
+  .numbers td.num { font-family: var(--font-mono); }
+
+  .shot { margin: 1.2rem 0 1.4rem; }
+  .shot .frame {
+    width: 100%; aspect-ratio: 16 / 9; border: 1px dashed var(--line); border-radius: 0.3rem;
+    display: grid; place-items: center; overflow: hidden; background: var(--paper-raised);
+    color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.75rem;
+  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot figcaption { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.45rem; }
+
+  .dl { display: inline-block; margin: 0.4rem 0 0.6rem; padding: 0.7rem 1.2rem; border-radius: 0.3rem; background: var(--accent); color: var(--paper); text-decoration: none; font-weight: 700; font-size: 0.92rem; }
+  .dl:hover { opacity: 0.88; }
+  .back { display: block; width: fit-content; margin-top: 2.5rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); text-decoration: none; }
+
+  .site-footer {
+    border-top: 1px solid var(--line); padding: 1.6rem 0 2.5rem;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    font-size: 0.78rem; color: var(--ink-soft);
+  }
+  .site-footer a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <div class="row">
+        <a class="wordmark" href="index.html"><span class="dot"></span><span style="font-weight:700;">LZC</span><span style="font-family:var(--font-body);font-weight:400;margin-left:0.4em;letter-spacing:0;">のアドオン倉庫</span></a>
+        <nav class="site-nav">
+          <a href="index.html#catalog">作品一覧</a>
+          <a href="index.html#columns">コラム</a>
+          <a href="about.html">このサイトについて</a>
+        </nav>
+      </div>
+    </header>
+
+    <article class="article">
+      <div class="article-head">
+        <p class="eyebrow" style="margin:0;">Column</p>
+        <h1>壁を透けて見えるエンティティの作り方</h1>
+        <div class="article-tags">
+          <span class="tag">マテリアル</span>
+          <span class="tag">エンティティ</span>
+        </div>
+      </div>
+
+      <p>壁の向こうにいるプレイヤーの輪郭を光らせて見せる、いわゆるウォールハックの見た目の作り方です。</p>
+      <p><a href="outline.html">LZ OUTLINE</a> で使っているやり方で、元は Glowing Addon(kashiwa_mocchi さん)の仕組みです。</p>
+
+      <h2>結論</h2>
+      <div class="summary">
+        <ul>
+          <li>自作のマテリアルで <strong><code>depthFunc</code> を <code>Always</code></strong> にすると、壁があっても手前に描かれる</li>
+          <li>体を少し大きくしたモデルをそのマテリアルで重ね、<strong>ステンシル</strong>で体の形の外側だけに描くと、輪郭になる</li>
+          <li>プロパティで出し入れする</li>
+        </ul>
+      </div>
+
+      <h2>1. マテリアルを作る</h2>
+      <p>リソースパックの <code>materials/entity.material</code> に、2つのマテリアルを作ります。</p>
+<pre><code>{
+  "materials": {
+    "version": "1.0.0",
+    "lzc_body:entity_alphatest": {
+      "+states": [ "EnableStencilTest", "StencilWrite" ],
+      "frontFace": { "stencilFunc": "Always", "stencilFailOp": "Replace", "stencilDepthFailOp": "Replace", "stencilPassOp": "Replace" },
+      "backFace":  { "stencilFunc": "Always", "stencilFailOp": "Replace", "stencilDepthFailOp": "Replace", "stencilPassOp": "Replace" },
+      "stencilRef": 2
+    },
+    "lzc_outline:entity_static": {
+      "+states": [ "InvertCulling", "EnableStencilTest", "DisableDepthWrite", "Blending" ],
+      "+defines": [ "USE_OVERLAY" ],
+      "-defines": [ "FANCY" ],
+      "depthFunc": "Always",
+      "frontFace": { "stencilFunc": "NotEqual" },
+      "backFace":  { "stencilFunc": "Equal" },
+      "stencilRef": 2,
+      "stencilReadMask": 2
+    }
+  }
+}</code></pre>
+      <ul>
+        <li><code>lzc_body</code>: ふつうの体に使う。描いたところに「ここは体」という印(ステンシルの 2)を残す</li>
+        <li><code>lzc_outline</code>: 輪郭に使う。<code>depthFunc: Always</code> で壁を無視して描き、<code>stencilFunc: NotEqual</code> で体の印があるところには描かない</li>
+      </ul>
+      <p>こうすると、大きくした体のうち、もとの体からはみ出たふちの部分だけが残って、輪郭になります。</p>
+
+      <h2>2. 輪郭用のモデルを作る</h2>
+      <p>プレイヤーと同じボーンのモデルを作り、キューブに <code>inflate</code> をつけて少しだけ大きくします。</p>
+<pre><code>{
+  "name": "body",
+  "parent": "waist",
+  "pivot": [ 0, 24, 0 ],
+  "cubes": [
+    { "origin": [ -4, 12, -2 ], "size": [ 8, 12, 4 ], "inflate": 0.5, "uv": [ 0, 0 ] }
+  ]
+}</code></pre>
+      <p>ボーンの名前と親子関係をプレイヤーと同じにしておけば、歩く・しゃがむなどのアニメがそのまま輪郭にもかかります。絵は、輪郭の色で塗った小さな画像で十分です。</p>
+
+      <h2>3. プレイヤーにつなぐ</h2>
+      <p>プレイヤーのクライアントエンティティで、体のマテリアルを <code>lzc_body</code> にし、輪郭のマテリアル・モデル・絵を足します。</p>
+<pre><code>"materials": {
+  "default": "lzc_body",
+  "cape": "lzc_body",
+  "lzc_outline": "lzc_outline"
+},
+"geometry": {
+  "lzc_outline": "geometry.lzc_outline"
+}</code></pre>
+      <p>輪郭のレンダーコントローラーは、光を受けないように <code>ignore_lighting</code> をつけます。</p>
+<pre><code>"controller.render.lzc_outline": {
+  "geometry": "Geometry.lzc_outline",
+  "textures": [ "Texture.lzc_outline" ],
+  "ignore_lighting": true,
+  "materials": [ { "*": "Material.lzc_outline" } ]
+}</code></pre>
+
+      <h2>4. プロパティで出し入れする</h2>
+      <p>ビヘイビアパックでプレイヤーに <code>client_sync: true</code> のプロパティを作り、それが 0 より大きいときだけ輪郭を描きます。</p>
+<pre><code>"render_controllers": [
+  { "controller.render.lzc_outline": "!query.is_spectator &amp;&amp; !variable.is_first_person &amp;&amp; query.property('lzc:outline') &gt; 0" }
+]</code></pre>
+      <p>一人称のときは自分の輪郭が画面をふさぐので、<code>!variable.is_first_person</code> で外しています。</p>
+      <p>LZ OUTLINE では、このプロパティを 1〜16 の数字にして、色の絵を16枚の配列から選んでいます。</p>
+      <p>特定の人にだけ輪郭を見せたいときは、<a href="column-visible-entity.html">特定の人にしか見えないエンティティの作り方</a> と同じく、<code>setPropertyOverrideForEntity</code> で見せたい人の側だけ値を変えます。</p>
+
+      <h2>気をつけること</h2>
+      <p><strong>パーティクルではできません。</strong>パーティクルが使えるマテリアルは <code>particles_add</code>・<code>particles_alpha</code>・<code>particles_blend</code> の3つだけで、自作のマテリアルを指定できないためです。壁越しに見せたいものは、エンティティとして作ります。</p>
+      <p>プレイヤーの <code>player.entity.json</code> を上書きするので、同じようにプレイヤーを上書きしている別のパックとは、どちらか片方しか効きません。</p>
+
+      <a class="back" href="index.html#columns">← コラム一覧へ</a>
+    </article>
+
+    <footer class="site-footer">
+      <span>ダウンロードはこのサイト上で行えます。<a href="about.html">このサイトについて</a> / <a href="privacy.html">プライバシーポリシー</a></span>
+      <span>© LZCのアドオン倉庫</span>
+    </footer>
+  </div>
+</body>
+</html>

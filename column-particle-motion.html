@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>パーティクルの動かし方 | LZCのアドオン倉庫</title>
+<meta name="description" content="Minecraft Bedrockで、パーティクルをまっすぐ飛ばす・進む向きに伸ばす・渦を巻かせる方法。setSpeedAndDirection、lookat_direction、particle_motion_parametric と、つまずきやすいところ。">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1868783573127394" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --paper: #f1efe8;
+    --paper-raised: #ffffff;
+    --ink: #211f1a;
+    --ink-soft: #6b6759;
+    --line: #ddd8ca;
+    --accent: #3d5a63;
+    --accent-soft: #d8e2e1;
+    --code-bg: #e7e3d8;
+
+    --font-body: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #17181a;
+      --paper-raised: #1f2124;
+      --ink: #ece9e1;
+      --ink-soft: #9a9689;
+      --line: #34332f;
+      --accent: #7fa6ac;
+      --accent-soft: #253235;
+      --code-bg: #26282b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .wrap { max-width: 76rem; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3rem); }
+
+  .site-header { padding: 2rem 0 1.5rem; border-bottom: 1px solid var(--line); }
+  .site-header .row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+  }
+  .wordmark {
+    font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 0.55rem; text-decoration: none;
+  }
+  .wordmark .dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--accent); flex: none; }
+  .site-nav { display: flex; gap: 1.6rem; font-size: 0.86rem; color: var(--ink-soft); }
+  .site-nav a { text-decoration: none; }
+  .site-nav a:hover { color: var(--ink); }
+
+  .article { max-width: 42rem; padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(2.5rem, 6vw, 4rem); }
+  .article-head { display: grid; gap: 0.9rem; margin-bottom: 2.2rem; }
+  .article-head h1 { font-size: clamp(1.45rem, 3.2vw, 2rem); line-height: 1.4; margin: 0; font-weight: 700; text-wrap: balance; }
+  .article-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tag {
+    font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft);
+  }
+
+  .article h2 {
+    font-size: 1.1rem; margin: 2.6rem 0 0.9rem; padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--line); font-weight: 700;
+  }
+  .article p, .article li { line-height: 1.95; font-size: 0.96rem; }
+  .article p { margin: 0 0 1rem; }
+  .article ul { margin: 0 0 1rem; padding-left: 1.3rem; }
+  .article li { margin: 0.15rem 0; }
+  .article strong { font-weight: 700; }
+  .article code {
+    font-family: var(--font-mono); font-size: 0.85em;
+    background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 0.2rem;
+  }
+  .article pre {
+    background: var(--code-bg); padding: 0.9rem 1.1rem; border-radius: 0.3rem;
+    overflow-x: auto; margin: 0 0 1rem;
+  }
+  .article pre code { background: none; padding: 0; font-size: 0.86rem; }
+
+  .summary {
+    background: var(--paper-raised); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 0.3rem; padding: 1rem 1.2rem; margin: 0 0 1rem;
+  }
+  .summary ul { margin: 0; }
+
+  .numbers { width: 100%; border-collapse: collapse; margin: 0 0 1rem; font-size: 0.92rem; }
+  .numbers th, .numbers td { border-bottom: 1px solid var(--line); padding: 0.55rem 0.4rem; text-align: left; }
+  .numbers th { color: var(--ink-soft); font-weight: 400; font-size: 0.8rem; }
+  .numbers td.num { font-family: var(--font-mono); }
+
+  .shot { margin: 1.2rem 0 1.4rem; }
+  .shot .frame {
+    width: 100%; aspect-ratio: 16 / 9; border: 1px dashed var(--line); border-radius: 0.3rem;
+    display: grid; place-items: center; overflow: hidden; background: var(--paper-raised);
+    color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.75rem;
+  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot figcaption { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.45rem; }
+
+  .dl { display: inline-block; margin: 0.4rem 0 0.6rem; padding: 0.7rem 1.2rem; border-radius: 0.3rem; background: var(--accent); color: var(--paper); text-decoration: none; font-weight: 700; font-size: 0.92rem; }
+  .dl:hover { opacity: 0.88; }
+  .back { display: block; width: fit-content; margin-top: 2.5rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); text-decoration: none; }
+
+  .site-footer {
+    border-top: 1px solid var(--line); padding: 1.6rem 0 2.5rem;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    font-size: 0.78rem; color: var(--ink-soft);
+  }
+  .site-footer a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <div class="row">
+        <a class="wordmark" href="index.html"><span class="dot"></span><span style="font-weight:700;">LZC</span><span style="font-family:var(--font-body);font-weight:400;margin-left:0.4em;letter-spacing:0;">のアドオン倉庫</span></a>
+        <nav class="site-nav">
+          <a href="index.html#catalog">作品一覧</a>
+          <a href="index.html#columns">コラム</a>
+          <a href="about.html">このサイトについて</a>
+        </nav>
+      </div>
+    </header>
+
+    <article class="article">
+      <div class="article-head">
+        <p class="eyebrow" style="margin:0;">Column</p>
+        <h1>パーティクルの動かし方</h1>
+        <div class="article-tags">
+          <span class="tag">パーティクル</span>
+          <span class="tag">スクリプト</span>
+        </div>
+      </div>
+
+      <p>ビームのようにまっすぐ飛ばす、渦を巻かせる、といったパーティクルの動きの付け方です。<a href="relicclash.html">Relic Clash</a> のエクスカリバーのビームや魔法の渦を作ったときのやり方をまとめます。</p>
+
+      <h2>結論</h2>
+      <div class="summary">
+        <ul>
+          <li>向きと速さは、スクリプトから <strong><code>setSpeedAndDirection</code></strong> で渡す</li>
+          <li>進む向きに長く伸ばしたいときは、<strong><code>facing_camera_mode: "lookat_direction"</code></strong> と <code>custom_direction</code></li>
+          <li>決まった形に動かしたいときは、<strong><code>particle_motion_parametric</code></strong> で位置を式で書く</li>
+          <li>止めたいときがあるなら、<strong>くり返すエミッターは使わない</strong></li>
+        </ul>
+      </div>
+
+      <h2>まっすぐ飛ばす</h2>
+      <p>スクリプトから、向きと速さをまとめて渡します。</p>
+<pre><code>import { MolangVariableMap } from "@minecraft/server";
+
+const vars = new MolangVariableMap();
+vars.setSpeedAndDirection("variable.move", 100, player.getViewDirection());
+player.dimension.spawnParticle("lzc:beam", pos, vars);</code></pre>
+      <p>これで、パーティクルの側では <code>variable.move.speed</code> と <code>variable.move.direction_x</code>・<code>_y</code>・<code>_z</code> が使えます。</p>
+<pre><code>"minecraft:emitter_shape_point": {
+  "direction": [ "variable.move.direction_x", "variable.move.direction_y", "variable.move.direction_z" ]
+},
+"minecraft:particle_initial_speed": "variable.move.speed",
+"minecraft:particle_motion_dynamic": {
+  "linear_acceleration": [ 0, 0, 0 ]
+}</code></pre>
+      <p>速さの単位は1秒あたりのブロック数です。100 なら1ティックに5ブロック進みます。エクスカリバーでは、ダメージの届く距離も1ティックに5ブロックずつ伸ばして、見た目とダメージをそろえています。</p>
+
+      <h2>進む向きに伸ばす</h2>
+      <p>ビームのすじのように、進む向きに長い形にしたいときは、板(ビルボード)を細長くして、向きを進む方向に合わせます。</p>
+<pre><code>"minecraft:particle_appearance_billboard": {
+  "size": [ 12, 1.2 ],
+  "facing_camera_mode": "lookat_direction",
+  "direction": {
+    "mode": "custom",
+    "custom_direction": [ "variable.move.direction_x", "variable.move.direction_y", "variable.move.direction_z" ]
+  }
+}</code></pre>
+      <p><code>lookat_direction</code> は、指定した向きを軸にしたまま、できるだけカメラのほうを向いてくれます。横から見ても線が消えません。</p>
+
+      <h2>決まった形に動かす(渦など)</h2>
+      <p><code>particle_motion_parametric</code> を使うと、出てからの時間で位置を式で決められます。下は、回りながら外へ広がって、少しずつ上がる渦の例です。</p>
+<pre><code>"minecraft:particle_motion_parametric": {
+  "relative_position": [
+    "math.cos(v.particle_random_1 * 360 + v.particle_age * 600) * (0.4 + 4.6 * math.sqrt(v.particle_age / v.particle_lifetime))",
+    "(0.1 + v.particle_random_2 * 2.6) * (v.particle_age / v.particle_lifetime)",
+    "math.sin(v.particle_random_1 * 360 + v.particle_age * 600) * (0.4 + 4.6 * math.sqrt(v.particle_age / v.particle_lifetime))"
+  ]
+}</code></pre>
+      <ul>
+        <li><code>v.particle_age * 600</code>: 1秒に600度回る</li>
+        <li><code>v.particle_random_1 * 360</code>: 粒ごとに回りはじめの角度をずらす</li>
+        <li><code>math.sqrt(v.particle_age / v.particle_lifetime)</code>: はじめは速く、だんだんゆっくり広がる</li>
+      </ul>
+
+      <h2>止めたいときがあるなら、くり返すエミッターは使わない</h2>
+      <p><code>minecraft:emitter_lifetime_looping</code> のエミッターは、ずっとくり返します。<code>spawnParticle</code> は出したあとに止める手段がないので、一度出すと消せません。</p>
+      <p>あとで止めたいものは、<code>emitter_lifetime_once</code> などの一回で終わるエミッターにして、スクリプトから0.1〜0.5秒ごとに出し直します。出し直しをやめれば、自然に消えます。</p>
+
+      <h2>気をつけること</h2>
+      <p><strong><code>setFloat</code> で渡した変数は、<code>emitter_shape</code> の中では使えませんでした。</strong><code>emitter_shape_point</code> の <code>direction</code> などで使うと「unknown variable」のエラーになりました。色や大きさ(<code>particle_appearance</code>)と、<code>particle_motion_parametric</code> の式の中では使えます。</p>
+      <p>なので、長さや半径のような数字は <code>setFloat</code> で渡して <code>particle_motion_parametric</code> の側で使い、<code>emitter_shape_point</code> は <code>{}</code> のままにしておきます。向きのような3つ組の値は、<code>setSpeedAndDirection</code> を名前を変えて何回か呼べば、何本でも渡せます(<code>variable.cu</code>、<code>variable.cv</code> など)。</p>
+      <p><strong>色は <code>#AARRGGBB</code> の順です。</strong>先頭の2けたが不透明度です。<code>#RRGGBBAA</code> のつもりで書くと、色がまったく変わります(私は水色のつもりが黄緑になりました)。</p>
+      <p><strong>世界の外の高さに出すとエラーになります。</strong>計算で場所を決めていると、地面の下(Y -64 より下)などに出してしまうことがあります。<code>system.runInterval</code> の中でこれが起きると、毎回エラーが出続けるので、高さをしぼるか <code>try</code> で囲みます。</p>
+      <p><strong>本人にだけ見せたいときは <code>player.spawnParticle()</code>。</strong><code>dimension.spawnParticle()</code> は近くの全員に見えますが、<code>player.spawnParticle()</code> はその人にしか見えません。</p>
+      <p>パーティクルは自作のマテリアルを使えないので、壁越しに見せることはできません(<a href="column-through-wall.html">壁を透けて見えるエンティティの作り方</a>)。</p>
+
+      <a class="back" href="index.html#columns">← コラム一覧へ</a>
+    </article>
+
+    <footer class="site-footer">
+      <span>ダウンロードはこのサイト上で行えます。<a href="about.html">このサイトについて</a> / <a href="privacy.html">プライバシーポリシー</a></span>
+      <span>© LZCのアドオン倉庫</span>
+    </footer>
+  </div>
+</body>
+</html>

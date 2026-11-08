@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サウンドの定義について | LZCのアドオン倉庫</title>
+<meta name="description" content="Minecraft Bedrockの sound_definitions.json の書き方と、遠くで鳴らない・全員に聞こえる・離れたほうが大きいといった音のつまずきの直し方。">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1868783573127394" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --paper: #f1efe8;
+    --paper-raised: #ffffff;
+    --ink: #211f1a;
+    --ink-soft: #6b6759;
+    --line: #ddd8ca;
+    --accent: #3d5a63;
+    --accent-soft: #d8e2e1;
+    --code-bg: #e7e3d8;
+
+    --font-body: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #17181a;
+      --paper-raised: #1f2124;
+      --ink: #ece9e1;
+      --ink-soft: #9a9689;
+      --line: #34332f;
+      --accent: #7fa6ac;
+      --accent-soft: #253235;
+      --code-bg: #26282b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .wrap { max-width: 76rem; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3rem); }
+
+  .site-header { padding: 2rem 0 1.5rem; border-bottom: 1px solid var(--line); }
+  .site-header .row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+  }
+  .wordmark {
+    font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 0.55rem; text-decoration: none;
+  }
+  .wordmark .dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--accent); flex: none; }
+  .site-nav { display: flex; gap: 1.6rem; font-size: 0.86rem; color: var(--ink-soft); }
+  .site-nav a { text-decoration: none; }
+  .site-nav a:hover { color: var(--ink); }
+
+  .article { max-width: 42rem; padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(2.5rem, 6vw, 4rem); }
+  .article-head { display: grid; gap: 0.9rem; margin-bottom: 2.2rem; }
+  .article-head h1 { font-size: clamp(1.45rem, 3.2vw, 2rem); line-height: 1.4; margin: 0; font-weight: 700; text-wrap: balance; }
+  .article-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tag {
+    font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-soft);
+  }
+
+  .article h2 {
+    font-size: 1.1rem; margin: 2.6rem 0 0.9rem; padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--line); font-weight: 700;
+  }
+  .article p, .article li { line-height: 1.95; font-size: 0.96rem; }
+  .article p { margin: 0 0 1rem; }
+  .article ul { margin: 0 0 1rem; padding-left: 1.3rem; }
+  .article li { margin: 0.15rem 0; }
+  .article strong { font-weight: 700; }
+  .article code {
+    font-family: var(--font-mono); font-size: 0.85em;
+    background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 0.2rem;
+  }
+  .article pre {
+    background: var(--code-bg); padding: 0.9rem 1.1rem; border-radius: 0.3rem;
+    overflow-x: auto; margin: 0 0 1rem;
+  }
+  .article pre code { background: none; padding: 0; font-size: 0.86rem; }
+
+  .summary {
+    background: var(--paper-raised); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 0.3rem; padding: 1rem 1.2rem; margin: 0 0 1rem;
+  }
+  .summary ul { margin: 0; }
+
+  .numbers { width: 100%; border-collapse: collapse; margin: 0 0 1rem; font-size: 0.92rem; }
+  .numbers th, .numbers td { border-bottom: 1px solid var(--line); padding: 0.55rem 0.4rem; text-align: left; }
+  .numbers th { color: var(--ink-soft); font-weight: 400; font-size: 0.8rem; }
+  .numbers td.num { font-family: var(--font-mono); }
+
+  .shot { margin: 1.2rem 0 1.4rem; }
+  .shot .frame {
+    width: 100%; aspect-ratio: 16 / 9; border: 1px dashed var(--line); border-radius: 0.3rem;
+    display: grid; place-items: center; overflow: hidden; background: var(--paper-raised);
+    color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.75rem;
+  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot figcaption { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.45rem; }
+
+  .dl { display: inline-block; margin: 0.4rem 0 0.6rem; padding: 0.7rem 1.2rem; border-radius: 0.3rem; background: var(--accent); color: var(--paper); text-decoration: none; font-weight: 700; font-size: 0.92rem; }
+  .dl:hover { opacity: 0.88; }
+  .back { display: block; width: fit-content; margin-top: 2.5rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); text-decoration: none; }
+
+  .site-footer {
+    border-top: 1px solid var(--line); padding: 1.6rem 0 2.5rem;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    font-size: 0.78rem; color: var(--ink-soft);
+  }
+  .site-footer a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <div class="row">
+        <a class="wordmark" href="index.html"><span class="dot"></span><span style="font-weight:700;">LZC</span><span style="font-family:var(--font-body);font-weight:400;margin-left:0.4em;letter-spacing:0;">のアドオン倉庫</span></a>
+        <nav class="site-nav">
+          <a href="index.html#catalog">作品一覧</a>
+          <a href="index.html#columns">コラム</a>
+          <a href="about.html">このサイトについて</a>
+        </nav>
+      </div>
+    </header>
+
+    <article class="article">
+      <div class="article-head">
+        <p class="eyebrow" style="margin:0;">Column</p>
+        <h1>サウンドの定義について</h1>
+        <div class="article-tags">
+          <span class="tag">サウンド</span>
+          <span class="tag">リソースパック</span>
+        </div>
+      </div>
+
+      <p><code>sound_definitions.json</code> の書き方と、音を鳴らすときにつまずいたところのまとめです。「遠くで鳴らない」「全員に聞こえてしまう」「離れたほうが大きい」あたりは、だいたいここが原因でした。</p>
+
+      <h2>結論</h2>
+      <div class="summary">
+        <ul>
+          <li>聞こえる範囲を決めるのは、<strong>定義の <code>volume</code> ではなく</strong>、<code>/playsound</code> の volume と定義の <code>max_distance</code></li>
+          <li>自分にだけ鳴らすなら <strong><code>player.playSound()</code></strong>。<code>/music</code> は全員に聞こえる</li>
+          <li>長い音には <strong><code>stream: true</code></strong></li>
+          <li>場所から鳴らす音はモノラル、耳もとで鳴る音や曲はステレオのまま</li>
+        </ul>
+      </div>
+
+      <h2>基本の形</h2>
+<pre><code>{
+  "format_version": "1.14.0",
+  "sound_definitions": {
+    "lzc.mortar.explode": {
+      "category": "player",
+      "max_distance": 96,
+      "sounds": [
+        { "name": "sounds/lzc/mortar_explode", "volume": 2 },
+        { "name": "sounds/lzc/mortar_explode2", "volume": 2 }
+      ]
+    }
+  }
+}</code></pre>
+      <ul>
+        <li><code>sounds</code> に何個か入れると、鳴らすたびにその中から1つ選ばれる</li>
+        <li><code>category</code> で、設定のどの音量で大きさが変わるかが決まる(種類は次の節)</li>
+        <li><code>max_distance</code> は、この距離まで聞こえる、という設定</li>
+      </ul>
+
+      <h2>category の種類</h2>
+      <p><code>category</code> は、設定のどの音量で大きさが変わるかを決めるものです。バニラの <code>sound_definitions.json</code> で使われているのは、次の10個です。</p>
+      <table class="numbers">
+        <thead><tr><th>category</th><th>効く音量の設定</th><th>バニラでの使われ方</th></tr></thead>
+        <tbody>
+          <tr><td class="num">music</td><td>音楽</td><td>BGM(<code>music.game</code> など)</td></tr>
+          <tr><td class="num">record</td><td>ジュークボックス・音符ブロック</td><td>レコード、ヤギの角笛</td></tr>
+          <tr><td class="num">player</td><td>プレイヤー</td><td>プレイヤーの動き、効果がかかったときの音</td></tr>
+          <tr><td class="num">block</td><td>ブロック</td><td>ブロックを置く・こわす、ビーコンなど</td></tr>
+          <tr><td class="num">neutral</td><td>友好的なモブ</td><td>動物や、敵でないモブ</td></tr>
+          <tr><td class="num">hostile</td><td>敵対的なモブ</td><td>ゾンビ、ウィザースケルトン、ブリーズなど</td></tr>
+          <tr><td class="num">ambient</td><td>環境</td><td>洞窟の音、バイオームの環境音</td></tr>
+          <tr><td class="num">weather</td><td>天気</td><td>雨、雷</td></tr>
+          <tr><td class="num">ui</td><td>サウンド</td><td>ボタンのクリック、本のページをめくる音</td></tr>
+          <tr><td class="num">bottle</td><td>—</td><td>ビンに水をくむ音など3つだけ</td></tr>
+        </tbody>
+      </table>
+      <p>設定の名前は、だいたいの対応です。書かれていない・知らない名前の category は「サウンド」の音量で変わります。</p>
+      <p><strong>選び方で気をつけたいのは、聞こえなくなる人が出ること</strong>です。たとえば効果音を <code>music</code> にすると、音楽の音量を0にして遊んでいる人には、その効果音も聞こえません。逆に、BGM を流しながら遊んでほしい演出の音を <code>music</code> にしておくと、音楽の音量と一緒に大きさを変えてもらえます。</p>
+      <p>迷ったら、だれが出した音かで選ぶと自然です。プレイヤーの武器や技なら <code>player</code>、置いたブロックや仕掛けなら <code>block</code>、自作の敵なら <code>hostile</code> です。</p>
+      <p>参考: <a href="https://github.com/Mojang/bedrock-samples" target="_blank" rel="noopener">bedrock-samples</a>(バニラの <code>sounds/sound_definitions.json</code>)、<a href="https://wiki.bedrock.dev/concepts/sounds" target="_blank" rel="noopener">Bedrock Wiki「Sounds」</a></p>
+
+      <h2>遠くで鳴らない: /playsound の volume</h2>
+      <p>座標をつけた <code>/playsound</code> は、<strong>コマンドの volume で聞こえる範囲が決まります</strong>。volume を書かないと 1 で、だいたい16マスです。それより遠い人には鳴らず、コマンドは「成功0」になります。</p>
+<pre><code>playsound lzc.strafe.attack @a ~ ~ ~ 10</code></pre>
+      <p>私は最初、定義の <code>"volume"</code> を大きくして範囲を広げようとしましたが、範囲は変わりませんでした。定義の volume は音の大きさだけで、聞こえる範囲とは別です。</p>
+
+      <h2>離れたほうが大きい: max_distance のない音</h2>
+      <p>バニラの <code>random.explode</code> を使ったら、ある程度離れたほうが音が大きく聞こえました。距離の設定がない古い音は、距離での小さくなり方がおかしくなることがあります。</p>
+      <p>なので、自分で <code>max_distance</code> をつけた定義を作り直して、そちらを鳴らしています。</p>
+
+      <h2>全員に聞こえてしまう: /music と player.playSound</h2>
+      <p><code>/music</code> には、だれに聞かせるかを決める引数がありません。スクリプトから特定のプレイヤーで実行しても、<strong>全員に</strong>流れます。</p>
+      <p>1人にだけ鳴らしたいときは、スクリプトの <code>player.playSound()</code> を使います。</p>
+<pre><code>player.playSound("lzc.self.explode", { volume: 0.8, pitch: 1.2 });
+player.playSound("lzc.bomb.throw", { location: here });</code></pre>
+      <p><code>location</code> をつけると、その場所から鳴っているように聞こえます。ほかの人にも聞かせたいときは、聞かせたい人それぞれに <code>playSound</code> を呼びます。投げた本人には耳もとの音、まわりの人には投げた場所からの音、のように分けることもできます。</p>
+      <p>止めるときは <code>stopsound @s 音の名前</code> を、その人で実行します。</p>
+
+      <h2>長い音には stream</h2>
+<pre><code>"lzc.excalibur": {
+  "category": "music",
+  "sounds": [
+    { "name": "sounds/lzc/excalibur", "stream": true, "volume": 0.3, "load_on_low_memory": true }
+  ]
+}</code></pre>
+      <p>曲や、何十秒もある演出の音は <code>stream: true</code> にします。<code>load_on_low_memory</code> をつけておくと、メモリの少ない端末でも読み込まれます。</p>
+
+      <h2>モノラルとステレオ</h2>
+      <p>場所から鳴らす効果音は、モノラルにしています。曲や、本人の耳もとで鳴らす音はステレオのままです。わざわざモノラルに変える必要はありません。</p>
+
+      <h2>おまけ: バニラの音を消す</h2>
+      <p>同じ名前で、<code>sounds</code> を空にした定義を書くと、その音は鳴らなくなります。たとえば、剣を振ったときの空振りの音を消したいときはこうします。</p>
+<pre><code>"game.player.attack.nodamage": {
+  "category": "player",
+  "sounds": []
+}</code></pre>
+      <p>リソースパック全体に効くので、自分の武器だけでなく、すべての空振りの音が消えます。</p>
+
+      <a class="back" href="index.html#columns">← コラム一覧へ</a>
+    </article>
+
+    <footer class="site-footer">
+      <span>ダウンロードはこのサイト上で行えます。<a href="about.html">このサイトについて</a> / <a href="privacy.html">プライバシーポリシー</a></span>
+      <span>© LZCのアドオン倉庫</span>
+    </footer>
+  </div>
+</body>
+</html>
