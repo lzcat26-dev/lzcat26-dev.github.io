@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>オトズレ2 — LZCのアドオン倉庫</title>
+<meta name="description" content="嵐の夜、逃げこんだ廃工場で7台の監視カメラを見張るMinecraft Bedrock向けホラーワールド。高次干渉嵐オトズレの続編。">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1868783573127394" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --night: #08080a;
+    --night-raised: #121216;
+    --line: #26262c;
+    --line-red: #4a1c18;
+    --text: #b9b4ab;
+    --text-dim: #6f6b65;
+    --bone: #e9e4da;
+    --blood: #a33c31;
+    --blood-hi: #c4483b;
+
+    --font-body: -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--night);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50;
+    background: repeating-linear-gradient(180deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 3px);
+  }
+  a { color: inherit; }
+
+  .o2-wrap { max-width: 56rem; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2rem); }
+
+  .o2-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 1.4rem 0; font-family: var(--font-mono); font-size: 0.76rem; letter-spacing: 0.04em;
+    color: var(--text-dim); text-decoration: none;
+  }
+  .o2-back:hover { color: var(--blood-hi); }
+
+  .o2-hero {
+    position: relative; overflow: hidden; border: 1px solid var(--line);
+    aspect-ratio: 16 / 9; background: #000 url('images/otz2-hero.jpg') center / cover no-repeat;
+  }
+  .o2-hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .o2-hero::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+  }
+  .o2-rec {
+    position: absolute; top: 0.9rem; left: 1rem; z-index: 2;
+    display: flex; align-items: center; gap: 0.45rem;
+    font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.16em; color: var(--bone);
+  }
+  .o2-rec .dot { width: 0.42rem; height: 0.42rem; border-radius: 999px; background: var(--blood-hi); animation: o2-blink 1.4s steps(1) infinite; }
+  .o2-clock {
+    position: absolute; top: 0.9rem; right: 1rem; z-index: 2;
+    font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; color: var(--bone);
+  }
+  @keyframes o2-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0.15; } }
+  @media (prefers-reduced-motion: reduce) { .o2-rec .dot { animation: none; } }
+
+  .o2-head { margin: 1.8rem 0 0; }
+  .o2-head h1 { margin: 0; color: var(--bone); font-size: clamp(1.7rem, 4.6vw, 2.6rem); letter-spacing: 0.04em; font-weight: 700; }
+  .o2-head h1 .two { color: var(--blood-hi); }
+  .o2-head .tagline { margin: 0.6rem 0 0; font-size: 0.95rem; line-height: 1.9; color: var(--text); }
+
+  .o2-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1.1rem 0 0; }
+  .o2-pill { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.04em; border: 1px solid var(--line); color: var(--text-dim); padding: 0.22rem 0.55rem; }
+
+  .o2-video { position: relative; aspect-ratio: 16 / 9; border: 1px solid var(--line); background: #000; margin: 2rem 0 0; }
+  .o2-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+
+  .o2-section { margin: 3rem 0 0; }
+  .o2-section-head { display: flex; align-items: baseline; gap: 0.7rem; margin: 0 0 1.2rem; }
+  .o2-section-head .idx { font-family: var(--font-mono); color: var(--blood-hi); font-size: 0.72rem; }
+  .o2-section-head h2 { color: var(--bone); font-size: 1.05rem; margin: 0; font-weight: 700; letter-spacing: 0.03em; }
+  .o2-section-head .rule { flex: 1; height: 1px; background: var(--line); }
+
+  .o2-prose { font-size: 0.94rem; line-height: 2.1; max-width: 42rem; }
+  .o2-prose p { margin: 0 0 1.1rem; }
+  .o2-prose p:last-child { margin-bottom: 0; }
+  .o2-prose .quiet { color: var(--text-dim); font-size: 0.86rem; }
+  .o2-prose a { color: var(--blood-hi); }
+
+  .o2-features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .o2-feature { background: var(--night); padding: 1.1rem 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .o2-feature .fk { font-family: var(--font-mono); color: var(--blood-hi); font-size: 0.66rem; letter-spacing: 0.08em; }
+  .o2-feature h3 { color: var(--bone); font-size: 0.93rem; margin: 0; font-weight: 700; }
+  .o2-feature p { color: var(--text-dim); font-size: 0.83rem; line-height: 1.8; margin: 0; }
+
+  .o2-cams { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; margin: 0 0 1.2rem; }
+  .o2-cams .group { border: 1px solid var(--line); padding: 0.9rem 1rem 1rem; }
+  .o2-cams .group h3 { margin: 0 0 0.6rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--blood-hi); font-weight: 400; }
+  .o2-cams ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.35rem; }
+  .o2-cams li { display: flex; gap: 0.7rem; font-size: 0.86rem; }
+  .o2-cams li .id { font-family: var(--font-mono); color: var(--text-dim); font-size: 0.78rem; width: 4.2rem; flex: none; }
+
+  .o2-steps { counter-reset: step; margin: 0; padding: 0; list-style: none; display: grid; gap: 0.9rem; max-width: 44rem; }
+  .o2-steps li { counter-increment: step; display: grid; grid-template-columns: 2.2rem 1fr; gap: 0.6rem; font-size: 0.9rem; line-height: 1.9; }
+  .o2-steps li::before { content: counter(step, decimal-leading-zero); font-family: var(--font-mono); color: var(--blood-hi); font-size: 0.78rem; padding-top: 0.2rem; }
+  .o2-steps b { color: var(--bone); font-weight: 700; }
+
+  .o2-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1.4rem 0 0; }
+  .o2-table th, .o2-table td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .o2-table th { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 400; }
+  .o2-table td:first-child { color: var(--bone); white-space: nowrap; width: 9rem; }
+  .o2-table td:last-child { color: var(--text-dim); }
+
+  .o2-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.9rem; }
+  .o2-shot { position: relative; aspect-ratio: 16 / 9; border: 1px solid var(--line); overflow: hidden; margin: 0; background: #000; }
+  .o2-shot.wide { grid-column: 1 / -1; aspect-ratio: 21 / 9; }
+  .o2-shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .o2-shot figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 0.55rem 0.7rem;
+    font-size: 0.72rem; color: var(--text);
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.85));
+  }
+
+  .o2-notes { margin: 0; padding: 0 0 0 1.1rem; font-size: 0.88rem; line-height: 2; max-width: 44rem; }
+  .o2-notes li::marker { color: var(--blood-hi); }
+
+  .o2-credits { display: grid; gap: 0.8rem; font-size: 0.82rem; line-height: 1.8; color: var(--text-dim); }
+  .o2-credits .row { border-left: 2px solid var(--line-red); padding: 0.1rem 0 0.1rem 0.8rem; }
+  .o2-credits .what { color: var(--bone); display: block; font-size: 0.8rem; }
+  .o2-credits a { color: var(--text); }
+
+  .o2-cta {
+    margin: 3rem 0 0; border: 1px solid var(--line-red); background: var(--night-raised);
+    padding: clamp(1.3rem, 3vw, 2rem);
+    display: flex; align-items: center; justify-content: space-between; gap: 1.4rem; flex-wrap: wrap;
+  }
+  .o2-cta h3 { color: var(--bone); margin: 0 0 0.4rem; font-size: 1rem; }
+  .o2-cta p { margin: 0; font-size: 0.82rem; color: var(--text-dim); }
+  .o2-dl {
+    display: inline-flex; align-items: center; gap: 0.6rem; background: var(--blood); color: #fff3ef;
+    font-family: var(--font-mono); font-weight: 700; font-size: 0.84rem; letter-spacing: 0.04em;
+    padding: 0.9rem 1.35rem; text-decoration: none; white-space: nowrap;
+  }
+  .o2-dl:hover { background: var(--blood-hi); }
+  .o2-dl-sub { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); margin: 0.5rem 0 0; }
+
+  .o2-footer {
+    margin: 3rem 0 0; border-top: 1px solid var(--line); padding: 1.4rem 0 3rem;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim);
+  }
+
+  @media (max-width: 40rem) {
+    .o2-features { grid-template-columns: 1fr; }
+    .o2-gallery { grid-template-columns: 1fr 1fr; }
+    .o2-shot.wide { aspect-ratio: 16 / 9; }
+  }
+  @media (max-width: 32rem) {
+    .o2-gallery { grid-template-columns: 1fr; }
+    .o2-cta { flex-direction: column; align-items: stretch; }
+    .o2-dl { justify-content: center; }
+    .o2-table td:first-child { width: auto; }
+  }
+</style>
+</head>
+<body>
+  <div class="o2-wrap">
+    <a class="o2-back" href="index.html">← 作品一覧へ戻る</a>
+
+    <div class="o2-hero" role="img" aria-label="オトズレ2 タイトルロゴ">
+      <canvas id="o2Rain"></canvas>
+      <span class="o2-rec"><span class="dot"></span>REC</span>
+      <span class="o2-clock" id="o2Clock">05:00:00</span>
+    </div>
+
+    <div class="o2-head">
+      <h1>オトズレ<span class="two">2</span></h1>
+      <p class="tagline">4時を過ぎても、嵐はやまなかった。</p>
+      <div class="o2-meta">
+        <span class="o2-pill">Minecraft Bedrock</span>
+        <span class="o2-pill">ホラー / 監視</span>
+        <span class="o2-pill">1〜数人(視点共有)</span>
+        <span class="o2-pill">1回 約30分</span>
+      </div>
+    </div>
+
+    <div class="o2-video"><iframe src="https://www.youtube.com/embed/4oYWtReQXAc" title="オトズレ2 紹介PV" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+
+    <section class="o2-section">
+      <div class="o2-section-head"><span class="idx">01</span><h2>概要</h2><span class="rule"></span></div>
+      <div class="o2-prose">
+        <p><a href="otozure.html">高次干渉嵐オトズレ</a>の続編。あの夜、時計が4時を回っても、嵐は終わらなかった。</p>
+        <p>観測所は機能を失い、仲間を残したまま外へ逃げた。雨の中を走り、たどり着いたのは、とうに捨てられた古い工場。そこにも監視室があった。</p>
+        <p>今度見張るのは、建物の中だけではない。外に3台、中に4台。7台の監視カメラに映る景色から、あるはずのないものを探し、朝まで持ちこたえる。</p>
+      </div>
+    </section>
+
+    <section class="o2-section">
+      <div class="o2-section-head"><span class="idx">02</span><h2>できること</h2><span class="rule"></span></div>
+      <div class="o2-features">
+        <div class="o2-feature">
+          <span class="fk">MONITOR</span>
+          <h3>7台の監視カメラ</h3>
+          <p>外の3台と中の4台を切りかえながら見張る。外のカメラは静かで、中のカメラは落ちつかない。</p>
+        </div>
+        <div class="o2-feature">
+          <span class="fk">REPORT</span>
+          <h3>異常の指摘</h3>
+          <p>おかしなものを見つけたら、10種類の中から何が起きているかを選んで指摘する。外れると電力を失う。</p>
+        </div>
+        <div class="o2-feature">
+          <span class="fk">POWER</span>
+          <h3>発電機と石炭</h3>
+          <p>電力は少しずつ減っていく。モニターの前を離れ、別の部屋の発電機に石炭をくべなければならない。</p>
+        </div>
+        <div class="o2-feature">
+          <span class="fk">CO-VIEW</span>
+          <h3>マルチプレイ(視点共有)</h3>
+          <p>操作するのは1人。ほかの参加者は、操作する人の視点をそのまま見て、一緒に見張れる。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="o2-section">
+      <div class="o2-section-head"><span class="idx">03</span><h2>監視カメラ</h2><span class="rule"></span></div>
+      <div class="o2-cams">
+        <div class="group">
+          <h3>INSIDE — 中</h3>
+          <ul>
+            <li><span class="id">CAM1-A</span>玄関</li>
+            <li><span class="id">CAM2-A</span>長い廊下</li>
+            <li><span class="id">CAM3-A</span>階段</li>
+            <li><span class="id">CAM4-A</span>倉庫跡</li>
+          </ul>
+        </div>
+        <div class="group">
+          <h3>OUTSIDE — 外</h3>
+          <ul>
+            <li><span class="id">CAM1-B</span>非常階段</li>
+            <li><span class="id">CAM2-B</span>裏門</li>
+            <li><span class="id">CAM3-B</span>遠景</li>
+          </ul>
+        </div>
+      </div>
+      <div class="o2-prose"><p class="quiet">ふだんの様子をよく覚えておくと、変化に気づきやすい。</p></div>
+    </section>
+
+    <section class="o2-section">
+      <div class="o2-section-head"><span class="idx">04</span><h2>遊び方</h2><span class="rule"></span></div>
+      <ol class="o2-steps">
+        <li><span><b>ロビー(嵐の夜のバス停)</b>から歩いて先へ進むと、ゲームが始まる。マルチのときは、最初に参加した人が操作する人になる。</span></li>
+        <li><span>監視室に着いたら、<b>椅子に座ってモニターをクリック</b>するとカメラの映像に入る。手持ちのアイテムで、次のカメラ・前のカメラ・指摘・モニターから離れる、を使い分ける。</span></li>
+        <li><span>異常を見つけたら<b>指摘</b>して、下の10種類から種類を選ぶ。少し調べたあと、当たっていれば異常は消える。外れると電力が減る。</span></li>
+        <li><span>電力が減ってきたら、モニターを離れて<b>発電機の部屋</b>へ。スコップで石炭を入れ、レバーを下ろす。そのあいだもカメラの向こうでは何かが起きている。</span></li>
+        <li><span><b>およそ30分</b>持ちこたえれば、夜が明ける。放っておくと取り返しのつかない異常もあるので、見逃しには気をつけて。</span></li>
+      </ol>
+
+      <table class="o2-table">
+        <thead><tr><th>指摘の種類</th><th>どんなとき</th></tr></thead>
+        <tbody>
+          <tr><td>物体出現</td><td>見慣れない物が増えている</td></tr>
+          <tr><td>物体消失</td><td>あるはずの物が無くなっている</td></tr>
+          <tr><td>物体変化</td><td>物の見た目や状態が変わっている</td></tr>
+          <tr><td>物体移動</td><td>物の位置が変わっている</td></tr>
+          <tr><td>照明の異常</td><td>明かりの点滅や消灯など</td></tr>
+          <tr><td>音</td><td>鳴るはずの音がしない、変な音がする</td></tr>
+          <tr><td>カメラ異常</td><td>映像そのものが歪む、移動するなどの不調</td></tr>
+          <tr><td>空間の異常</td><td>空間そのものが歪んでいる</td></tr>
+          <tr><td>深淵</td><td>画面が黒く塗り潰されていく</td></tr>
+          <tr><td>来訪者</td><td>何かがいる</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="o2-section">
+      <div class="o2-section-head"><span class="idx">05</span><h2>映像</h2><span class="rule"></span></div>
+      <div class="o2-gallery">
+        <figure class="o2-shot wide"><img src="images/otz2-room1.jpg" alt="前作の監視室" loading="lazy"><figcaption>あの夜の監視室</figcaption></figure>
+        <figure class="o2-shot"><img src="images/otz2-factory.jpg" alt="雨の中の廃工場" loading="lazy"><figcaption>逃げこんだ廃工場</figcaption></figure>
+        <figure class="o2-shot"><img src="images/otz2-room2.jpg" alt="懐中電灯で照らした監視室" loading="lazy"><figcaption>新しい監視室</figcaption></figure>
+        <figure class="o2-shot"><img src="images/otz2-coal.jpg" alt="発電機の部屋" loading="lazy"><figcaption>発電機の部屋</figcaption></figure>
+        <figure class="o2-shot"><img src="images/otz2-monitors.jpg" alt="モニターが点いた監視室" loading="lazy"><figcaption>監視、開始</figcaption></figure>
+        <figure class="o2-shot"><img src="images/otz2-cam-corridor.jpg" alt="CAM2-A 長い廊下" loading="lazy"><figcaption>CAM2-A 長い廊下</figcaption></figure>
+        <figure class="o2-shot"><img src="images/otz2-cam-gate.jpg" alt="CAM2-B 裏門" loading="lazy"><figcaption>CAM2-B 裏門</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="o2-section">
+      <div class="o2-section-head"><span class="idx">06</span><h2>注意</h2><span class="rule"></span></div>
+      <ul class="o2-notes">
+        <li>.mcworld ファイルです。ダウンロードして開くと、ワールドとして追加されます。</li>
+        <li>音が手がかりになる場面があります。ヘッドホンでのプレイがおすすめです。</li>
+        <li>マルチプレイでは、操作できるのは1人だけです。ほかの人は操作する人の視点を見ます。</li>
+        <li>暗い場面と、驚かせる演出があります。</li>
+      </ul>
+    </section>
+
+    <section class="o2-section">
+      <div class="o2-section-head"><span class="idx">07</span><h2>クレジット</h2><span class="rule"></span></div>
+      <div class="o2-credits">
+        <div class="row">
+          <span class="what">銃のモデル(M16)</span>
+          This work is based on "<a href="https://sketchfab.com/3d-models/m16a1-low-poly-bcf421747bea4afd942381cefa498a02" target="_blank" rel="noopener">M16A1 Low Poly</a>" by <a href="https://sketchfab.com/aBraM_" target="_blank" rel="noopener">aBraM_</a> licensed under <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>
+        </div>
+        <div class="row">
+          <span class="what">手形の素材</span>
+          「【ホラー向け】手型-単色(透過)」ピラルク様(<a href="https://commons.nicovideo.jp/works/nc269971" target="_blank" rel="noopener">ニコニ・コモンズ nc269971</a>)
+        </div>
+      </div>
+    </section>
+
+    <div class="o2-cta">
+      <div>
+        <h3>ダウンロード</h3>
+        <p>v1.0.0 — .mcworld ファイルです。</p>
+      </div>
+      <div>
+        <a class="o2-dl" href="https://github.com/lzcat26-dev/lzcat26-dev.github.io/releases/download/otozure2-v1.0.0/otozure2.v1.0.0.mcworld">ダウンロード →</a>
+        <p class="o2-dl-sub">v1.0.0 (約60MB)</p>
+      </div>
+    </div>
+
+    <footer class="o2-footer">
+      <span>オトズレ2 — Minecraft Bedrock</span>
+      <span>LZCのアドオン倉庫</span>
+    </footer>
+  </div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var clock = document.getElementById("o2Clock");
+  var left = 3600;
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function showClock() {
+    var t = 4 * 3600 + left;
+    clock.textContent = pad(Math.floor(t / 3600)) + ":" + pad(Math.floor(t / 60) % 60) + ":" + pad(t % 60);
+  }
+  showClock();
+  if (!reduce) setInterval(function () { left = left > 0 ? left - 1 : 3600; showClock(); }, 1000);
+
+  var canvas = document.getElementById("o2Rain");
+  if (!canvas) return;
+  var ctx = canvas.getContext("2d");
+  var drops = [];
+  function size() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    drops = [];
+    var n = Math.floor(canvas.width * canvas.height / 5000);
+    for (var i = 0; i < n; i++) drops.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, l: 8 + Math.random() * 14, v: 7 + Math.random() * 7 });
+  }
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "rgba(200, 205, 215, 0.22)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (var i = 0; i < drops.length; i++) {
+      var d = drops[i];
+      ctx.moveTo(d.x, d.y);
+      ctx.lineTo(d.x - d.l * 0.18, d.y + d.l);
+      if (!reduce) { d.y += d.v; d.x -= d.v * 0.18; if (d.y > canvas.height) { d.y = -d.l; d.x = Math.random() * (canvas.width + 40); } }
+    }
+    ctx.stroke();
+    if (!reduce) requestAnimationFrame(draw);
+  }
+  size();
+  draw();
+  window.addEventListener("resize", function () { size(); if (reduce) draw(); });
+})();
+</script>
+</body>
+</html>
